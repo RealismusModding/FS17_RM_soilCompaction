@@ -2,7 +2,7 @@
 <modDesc descVersion="37">
     <author>Realismus Modding</author>
     <contributors>baron, Rahkiin, reallogger</contributors>
-    <version>1.0.0.0</version>
+    <version>0.0.0.1</version>
     <title>
         <en>Soil Compaction</en>
         <de>Soil Compaction</de>
@@ -24,7 +24,7 @@
     <multiplayer supported="true"/>
 
     <extraSourceFiles>
-        <sourceFile filename="src/registerSpruceTrees.lua" />
+        <sourceFile filename="src/scCompactionManager.lua" />
     </extraSourceFiles>
 
     <l10n>

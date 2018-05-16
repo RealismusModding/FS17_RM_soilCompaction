@@ -17,7 +17,7 @@ scTirePressure.PRESSURE_MAX = 180
 
 function scTirePressure:prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(Motorized, specializations) and
-           SpecializationUtil.hasSpecialization(ssAtWorkshop, specializations) and
+           --SpecializationUtil.hasSpecialization(ssAtWorkshop, specializations) and
            SpecializationUtil.hasSpecialization(scSoilCompaction, specializations)
 end
 

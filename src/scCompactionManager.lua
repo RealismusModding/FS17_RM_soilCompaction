@@ -9,7 +9,7 @@
 
 scCompactionManager = {}
 
-scCompactionManager.superFunc = {} -- To store function pointers in Utils that we intend to overwrite
+--scCompactionManager.superFunc = {} -- To store function pointers in Utils that we intend to overwrite
 scCompactionManager.cultivatorDecompactionDelta = 1 -- Cultivators additive effect on the compaction layer
 
 scCompactionManager.overlayColor = {} -- Additional colors for the compaction overlay (false/true: useColorblindMode)
@@ -26,23 +26,17 @@ scCompactionManager.overlayColor[true] = {
 }
 
 function scCompactionManager:preLoad()
-    g_seasons.soilCompaction = self
+    soilCompaction = self
 
-    ssUtil.overwrittenFunction(InGameMenu, "generateFruitOverlay", scCompactionManager.inGameMenuGenerateFruitOverlay)
-
-    ssUtil.overwrittenStaticFunction(Utils, "cutFruitArea", scCompactionManager.cutFruitArea)
-    ssUtil.overwrittenStaticFunction(Utils, "updateCultivatorArea", scCompactionManager.updateCultivatorArea)
+    SpecializationUtil.registerSpecialization("deepCultivator", "scDeepCultivator", "scDeepCultivator.lua")
+    SpecializationUtil.registerSpecialization("soilCompaction", "scSoilCompaction", "scSoilCompaction.lua")
+    SpecializationUtil.registerSpecialization("tirePressure", "scTirePressure", "scTirePressure.lua")
 end
 
 function scCompactionManager:load(savegame, key)
-    local newGame = savegame == nil
-
-    -- Enable compaction by default on new savegames only
-    self.enabled = ssXMLUtil.getBool(savegame, key .. ".settings.soilCompactionEnabled", newGame)
 end
 
 function scCompactionManager:save(savegame, key)
-    ssXMLUtil.setBool(savegame, key .. ".settings.soilCompactionEnabled", self.enabled)
 end
 
 function scCompactionManager:loadMap()
@@ -93,28 +87,26 @@ end
 -- When running a cultivator, decompact a bit as well.
 -- The plough already decompacts in vanilla. Using a cultivator now allows being more effective.
 function scCompactionManager.updateCultivatorArea(superFunc, x, z, x1, z1, x2, z2, forced, commonForced, angle, delta)
-    if scCompactionManager.enabled then
-        local detailId = g_currentMission.terrainDetailId
-        local compactFirstChannel = g_currentMission.ploughCounterFirstChannel
-        local compactNumChannels = g_currentMission.ploughCounterNumChannels
-        local x0, z0, widthX, widthZ, heightX, heightZ = Utils.getXZWidthAndHeight(detailId, x, z, x1, z1, x2, z2)
+    local detailId = g_currentMission.terrainDetailId
+    local compactFirstChannel = g_currentMission.ploughCounterFirstChannel
+    local compactNumChannels = g_currentMission.ploughCounterNumChannels
+    local x0, z0, widthX, widthZ, heightX, heightZ = Utils.getXZWidthAndHeight(detailId, x, z, x1, z1, x2, z2)
 
-        -- Apply decompaction delta where ground is field but not yet cultivated
-        setDensityMaskParams(detailId, "greater", g_currentMission.cultivatorValue)
-        setDensityCompareParams(detailId, "greater", 0)
+    -- Apply decompaction delta where ground is field but not yet cultivated
+    setDensityMaskParams(detailId, "greater", g_currentMission.cultivatorValue)
+    setDensityCompareParams(detailId, "greater", 0)
 
-        addDensityMaskedParallelogram(
-            detailId,
-            x0, z0, widthX, widthZ, heightX, heightZ,
-            compactFirstChannel, compactNumChannels,
-            detailId,
-            g_currentMission.terrainDetailTypeFirstChannel, g_currentMission.terrainDetailTypeNumChannels,
-            Utils.getNoNil(delta, scCompactionManager.cultivatorDecompactionDelta)
-        )
+    addDensityMaskedParallelogram(
+        detailId,
+        x0, z0, widthX, widthZ, heightX, heightZ,
+       compactFirstChannel, compactNumChannels,
+       detailId,
+        g_currentMission.terrainDetailTypeFirstChannel, g_currentMission.terrainDetailTypeNumChannels,
+        Utils.getNoNil(delta, scCompactionManager.cultivatorDecompactionDelta)
+    )
 
-        setDensityMaskParams(detailId, "greater", 0)
-        setDensityCompareParams(detailId, "greater", -1)
-    end
+    setDensityMaskParams(detailId, "greater", 0)
+    setDensityCompareParams(detailId, "greater", -1)
 
     return superFunc(x, z, x1, z1, x2, z2, forced, commonForced, angle)
 end
@@ -122,7 +114,7 @@ end
 -- Draw all the different states of compaction in overlay menu
 function scCompactionManager:inGameMenuGenerateFruitOverlay(superFunc)
     -- If ploughing overlay is selected we override everything being drawn
-    if scCompactionManager.enabled and self.mapNeedsPlowing and self.mapSelectorMapping[self.mapOverviewSelector:getState()] == InGameMenu.MAP_SOIL then
+    if self.mapNeedsPlowing and self.mapSelectorMapping[self.mapOverviewSelector:getState()] == InGameMenu.MAP_SOIL then
         if g_currentMission ~= nil and g_currentMission.terrainDetailId ~= 0 then
 
             -- Begin draw foliage state overlay
@@ -146,3 +138,9 @@ function scCompactionManager:inGameMenuGenerateFruitOverlay(superFunc)
         superFunc(self)
     end
 end
+
+InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
+Utils.cutFruitArea = Utils.overwrittenFunction(Utils.cutFruitArea, scCompactionManager.cutFruitArea)
+Utils.updateCultivatorArea = Utils.overwrittenFunction(Utils.updateCultivatorArea, scCompactionManager.updateCultivatorArea)
+
+addModEventListener(scCompactionManager)
