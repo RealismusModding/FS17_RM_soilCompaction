@@ -42,6 +42,12 @@ end
 function scCompactionManager:loadMap()
 end
 
+function scCompactionManager:mouseEvent(posX, posY, isDown, isUp, button)
+end
+
+function scCompactionManager:keyEvent(unicode, sym, modifier, isDown)
+end
+
 function scCompactionManager:readStream(streamId, connection)
     self.enabled = streamReadBool(streamId)
 end
@@ -50,12 +56,20 @@ function scCompactionManager:writeStream(streamId, connection)
     streamWriteBool(streamId, self.enabled)
 end
 
+function scCompactionManager:update(dt)
+end
+
+function scCompactionManager:draw()
+end
+
+function scCompactionManager:deleteMap()
+end
+
 -- Cutting fruit no longer increases the ploughcounter: only driving over an area does.
 function scCompactionManager.cutFruitArea(superFunc, fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
-    if not scCompactionManager.enabled then
-        return superFunc(fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
-    end
-
+    --if not scCompactionManager.enabled then
+     --   return superFunc(fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
+    --end
     local tmpNumChannels = g_currentMission.ploughCounterNumChannels
 
     -- Setting to 0 makes the use of it affect nothing
@@ -87,6 +101,8 @@ end
 -- When running a cultivator, decompact a bit as well.
 -- The plough already decompacts in vanilla. Using a cultivator now allows being more effective.
 function scCompactionManager.updateCultivatorArea(superFunc, x, z, x1, z1, x2, z2, forced, commonForced, angle, delta)
+    local realArea, area = superFunc(x, z, x1, z1, x2, z2, forced, commonForced, angle)
+
     local detailId = g_currentMission.terrainDetailId
     local compactFirstChannel = g_currentMission.ploughCounterFirstChannel
     local compactNumChannels = g_currentMission.ploughCounterNumChannels
@@ -108,7 +124,7 @@ function scCompactionManager.updateCultivatorArea(superFunc, x, z, x1, z1, x2, z
     setDensityMaskParams(detailId, "greater", 0)
     setDensityCompareParams(detailId, "greater", -1)
 
-    return superFunc(x, z, x1, z1, x2, z2, forced, commonForced, angle)
+    return realArea, area
 end
 
 -- Draw all the different states of compaction in overlay menu

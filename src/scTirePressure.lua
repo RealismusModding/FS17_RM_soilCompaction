@@ -101,7 +101,7 @@ function scTirePressure:update(dt)
     -- self.scInCabTirePressureControl = true
 
     if self.isClient and self:getIsActiveForInput(false) and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
-        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SEASONS_TIRE_PRESSURE)
+        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SOILCOMPACTION_TIRE_PRESSURE)
 
         if InputBinding.hasEvent(InputBinding.SEASONS_TIRE_PRESSURE) then
             self:toggleTirePressure()
