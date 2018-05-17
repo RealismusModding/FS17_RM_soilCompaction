@@ -211,8 +211,8 @@ function scSoilCompaction:update(dt)
         end
     end
 
-    local isInRange = SpecializationUtil.callSpecializationsFunction("isPlayerInRange")
-    if self.ssCompactionIndicatorIsCorrect and isInRange then
+    -- Not sure why self:isPlayerInRange() does not work
+    if self.ssCompactionIndicatorIsCorrect and self.scPlayerInRange ~= nil then
         local worstCompaction = 4
         for _, wheel in pairs(self.wheels) do
             -- fallback to 'no compaction'
@@ -222,7 +222,6 @@ function scSoilCompaction:update(dt)
         if worstCompaction < 4 then
             local storeItem = StoreItemsUtil.storeItemsByXMLFilename[self.configFileName:lower()]
             local compactionText = string.format(g_i18n:getText("COMPACTION_" .. tostring(worstCompaction)), storeItem.name)
-
             g_currentMission:addExtraPrintText(compactionText)
         end
     end

@@ -62,11 +62,9 @@ function scCompactionManager:keyEvent(unicode, sym, modifier, isDown)
 end
 
 function scCompactionManager:readStream(streamId, connection)
-    self.enabled = streamReadBool(streamId)
 end
 
 function scCompactionManager:writeStream(streamId, connection)
-    streamWriteBool(streamId, self.enabled)
 end
 
 function scCompactionManager:update(dt)
