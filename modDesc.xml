@@ -25,6 +25,7 @@
 
     <extraSourceFiles>
         <sourceFile filename="src/scCompactionManager.lua" />
+        <sourceFile filename="src/scAirCompressorPlaceable.lua"/>
     </extraSourceFiles>
 
     <l10n>
@@ -105,6 +106,7 @@
     </inputBindings>
     
     <storeItems>
+        <storeItem rootNode="placeable" xmlFilename="resources/placeables/wopstr700/wopstr700.xml" />
     </storeItems>
 </modDesc>
 
