@@ -24,7 +24,7 @@ function scSoilCompaction:load(savegame)
     self.getCompactionLayers = scSoilCompaction.getCompactionLayers
     self.getTireMaxLoad = scSoilCompaction.getTireMaxLoad
 
-    self.ssCompactionIndicatorIsCorrect = false
+    self.scCompactionIndicatorIsCorrect = false
 end
 
 function scSoilCompaction:delete()
@@ -63,7 +63,7 @@ function scSoilCompaction:applySoilCompaction()
             end
 
             if wheel.scMaxLoad == nil then
-                wheel.ssMaxDeformation = Utils.getNoNil(wheel.maxDeformation,0)
+                wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation,0)
                 wheel.scMaxLoad = self:getTireMaxLoad(wheel, inflationPressure)
             end
 
@@ -97,7 +97,7 @@ function scSoilCompaction:applySoilCompaction()
             elseif soilBulkDensityRef > scSoilCompaction.HEAVY_COMPACTION then
                 wheel.possibleCompaction = 0
             end
-            self.ssCompactionIndicatorIsCorrect = true
+            self.scCompactionIndicatorIsCorrect = true
 
             --below only for debug print. TODO: remove when done
             wheel.soilBulkDensity = soilBulkDensityRef
@@ -165,7 +165,7 @@ function scSoilCompaction:applySoilCompaction()
 end
 
 function scSoilCompaction:getTireMaxLoad(wheel, inflationPressure)
-    local tireLoadIndex = 981 * wheel.ssMaxDeformation + 73
+    local tireLoadIndex = 981 * wheel.scMaxDeformation + 73
     local inflationFac = 0.56 + 0.002 * inflationPressure
 
     -- in kN
@@ -212,7 +212,7 @@ function scSoilCompaction:update(dt)
     end
 
     -- Not sure why self:isPlayerInRange() does not work
-    if self.ssCompactionIndicatorIsCorrect and self.scPlayerInRange ~= nil then
+    if self.scCompactionIndicatorIsCorrect and self.scPlayerInRange ~= nil then
         local worstCompaction = 4
         for _, wheel in pairs(self.wheels) do
             -- fallback to 'no compaction'

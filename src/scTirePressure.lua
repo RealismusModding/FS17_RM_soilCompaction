@@ -86,17 +86,17 @@ function scTirePressure:updateInflationPressure()
 
     for _, wheel in pairs(self.wheels) do
         if wheel.tireType ~= tireTypeCrawler then
-            if wheel.ssMaxDeformation == nil then
-                wheel.ssMaxDeformation = Utils.getNoNil(wheel.maxDeformation,0)
+            if wheel.scMaxDeformation == nil then
+                wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation,0)
             end
 
-            wheel.ssMaxLoad = self:getTireMaxLoad(wheel, self.scInflationPressure)
-            wheel.maxDeformation = wheel.ssMaxDeformation * scTirePressure.PRESSURE_NORMAL / self.scInflationPressure
+            wheel.scMaxLoad = self:getTireMaxLoad(wheel, self.scInflationPressure)
+            wheel.maxDeformation = wheel.scMaxDeformation * scTirePressure.PRESSURE_NORMAL / self.scInflationPressure
         end
     end
 
     -- Update compaction indicator
-    self.ssCompactionIndicatorIsCorrect = false
+    self.scCompactionIndicatorIsCorrect = false
 end
 
 function scTirePressure:update(dt)

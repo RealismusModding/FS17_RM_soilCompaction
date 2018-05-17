@@ -29,11 +29,11 @@ function scDeepCultivator:load(savegame)
     self.scCultivationDepth = scDeepCultivator.DEPTH_SHALLOW
 
     self.scOrigMaxForce = self.powerConsumer.maxForce
-    self.scDeepCultivatorMod = getXMLBool(self.xmlFile, "vehicle.ssCultivation#deep")
-    self.ssSubsoilerMod = getXMLBool(self.xmlFile, "vehicle.ssCultivation#subsoiler")
+    self.scDeepCultivatorMod = getXMLBool(self.xmlFile, "vehicle.scCultivation#deep")
+    self.scSubsoilerMod = getXMLBool(self.xmlFile, "vehicle.scCultivation#subsoiler")
 
     local isValid, depth = scDeepCultivator.isStoreItemDeepCultivator(StoreItemsUtil.storeItemsByXMLFilename[self.configFileName:lower()])
-    self.ssValidDeepCultivator = isValid
+    self.scValidDeepCultivator = isValid
     if depth ~= nil then
         self.scCultivationDepth = depth
     end
@@ -122,7 +122,7 @@ end
 
 function scDeepCultivator:update(dt)
     if not g_currentMission:getIsServer()
-        or not self.ssValidDeepCultivator then
+        or not self.scValidDeepCultivator then
         return end
 
     if self:getIsActiveForInput(true) then
