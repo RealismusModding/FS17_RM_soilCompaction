@@ -12,6 +12,9 @@ scCompactionManager = {}
 --scCompactionManager.superFunc = {} -- To store function pointers in Utils that we intend to overwrite
 scCompactionManager.cultivatorDecompactionDelta = 1 -- Cultivators additive effect on the compaction layer
 
+local modItem = ModsUtil.findModItemByModName(g_currentModName)
+scCompactionManager.modDir = g_currentModDirectory
+
 scCompactionManager.overlayColor = {} -- Additional colors for the compaction overlay (false/true: useColorblindMode)
 scCompactionManager.overlayColor[false] = {
     {0.6172, 0.0510, 0.0510, 1},
@@ -25,12 +28,21 @@ scCompactionManager.overlayColor[true] = {
     {0.6672, 0.3333, 0.3333, 1},
 }
 
-function scCompactionManager:preLoad()
-    soilCompaction = self
+function scCompactionManager:installVehicleSpecializations()
+    for _, vehicleType in pairs(VehicleTypeUtil.vehicleTypes) do
+        if vehicleType ~= nil then
+            table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("soilCompaction"))
+            table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("atWorkshop"))
 
-    SpecializationUtil.registerSpecialization("deepCultivator", "scDeepCultivator", "scDeepCultivator.lua")
-    SpecializationUtil.registerSpecialization("soilCompaction", "scSoilCompaction", "scSoilCompaction.lua")
-    SpecializationUtil.registerSpecialization("tirePressure", "scTirePressure", "scTirePressure.lua")
+            if SpecializationUtil.hasSpecialization(Motorized, vehicleType.specializations) then
+                table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("tirePressure"))
+            end
+
+            if SpecializationUtil.hasSpecialization(Cultivator, vehicleType.specializations) then
+                table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("deepCultivator"))
+            end
+        end
+    end
 end
 
 function scCompactionManager:load(savegame, key)
@@ -40,6 +52,7 @@ function scCompactionManager:save(savegame, key)
 end
 
 function scCompactionManager:loadMap()
+    self:installVehicleSpecializations()
 end
 
 function scCompactionManager:mouseEvent(posX, posY, isDown, isUp, button)
@@ -154,6 +167,59 @@ function scCompactionManager:inGameMenuGenerateFruitOverlay(superFunc)
         superFunc(self)
     end
 end
+
+function logInfo(...)
+    local str = "[Soil Compaction]"
+    for i = 1, select("#", ...) do
+        str = str .. " " .. tostring(select(i, ...))
+    end
+    print(str)
+end
+
+function print_r(t)
+    local print_r_cache = {}
+    local function sub_print_r(t, indent)
+        if (print_r_cache[tostring(t)]) then
+            print(indent .. "*" .. tostring(t))
+        else
+            print_r_cache[tostring(t)] = true
+            if (type(t) == "table") then
+                for pos, val in pairs(t) do
+                    pos = tostring(pos)
+                    if (type(val) == "table") then
+                        print(indent .. "[" .. pos .. "] => " .. tostring(t) .. " {")
+                        sub_print_r(val, indent .. string.rep(" ", string.len(pos) + 8))
+                        print(indent .. string.rep(" ", string.len(pos) + 6) .. "}")
+                    elseif (type(val) == "string") then
+                        print(indent .. "[" .. pos .. '] => "' .. val .. '"')
+                    else
+                        print(indent .. "[" .. pos .. "] => " .. tostring(val))
+                    end
+                end
+            else
+                print(indent .. tostring(t))
+            end
+        end
+    end
+    if (type(t) == "table") then
+        print(tostring(t) .. " {")
+        sub_print_r(t, "  ")
+        print("}")
+    else
+        sub_print_r(t, "  ")
+    end
+    print()
+end
+
+function mathRound(value, idp)
+    local mult = 10 ^ (idp or 0)
+    return math.floor(value * mult + 0.5) / mult
+end
+
+SpecializationUtil.registerSpecialization("deepCultivator", "scDeepCultivator", scCompactionManager.modDir .. "src/scDeepCultivator.lua")
+SpecializationUtil.registerSpecialization("soilCompaction", "scSoilCompaction", scCompactionManager.modDir .. "src/scSoilCompaction.lua")
+SpecializationUtil.registerSpecialization("tirePressure", "scTirePressure", scCompactionManager.modDir .. "src/scTirePressure.lua")
+SpecializationUtil.registerSpecialization("atWorkshop", "scAtWorkshop", scCompactionManager.modDir .. "src/scAtWorkshop.lua")
 
 InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
 Utils.cutFruitArea = Utils.overwrittenFunction(Utils.cutFruitArea, scCompactionManager.cutFruitArea)

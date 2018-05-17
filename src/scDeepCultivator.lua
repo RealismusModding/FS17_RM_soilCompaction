@@ -43,7 +43,9 @@ function scDeepCultivator:load(savegame)
     end
 
     if savegame ~= nil then
-        self.scCultivationDepth = ssXMLUtil.getInt(savegame.xmlFile, savegame.key .. "#scCultivationDepth", self.scCultivationDepth)
+        if savegame.xmlFile ~= nil then
+            self.scCultivationDepth = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scCultivationDepth"), self.scCultivationDepth)
+        end
     end
 end
 
@@ -120,7 +122,6 @@ end
 
 function scDeepCultivator:update(dt)
     if not g_currentMission:getIsServer()
-        or not g_seasons.soilCompaction.enabled
         or not self.ssValidDeepCultivator then
         return end
 
@@ -136,12 +137,7 @@ function scDeepCultivator:update(dt)
 end
 
 function scDeepCultivator:processCultivatorAreas(superFunc, ...)
-    local depth = scDeepCultivator.DEPTH_SHALLOW
-
-    -- When SC is disabled we should not apply a deeper depth even though it is configured as such
-    if g_seasons.soilCompaction.enabled then
-        depth = self.scCultivationDepth
-    end
+    local depth = self.scCultivationDepth
 
     local oldAreaUpdater = Utils.updateCultivatorArea
     Utils.updateCultivatorArea = function (startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, forced, commonForced, angle)

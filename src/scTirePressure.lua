@@ -34,7 +34,9 @@ function scTirePressure:load(savegame)
     self.toggleTirePressure = scTirePressure.toggleTirePressure
 
     if savegame ~= nil then
-        self.scInflationPressure = ssXMLUtil.getInt(savegame.xmlFile, savegame.key .. "#scInflationPressure", self.scInflationPressure)
+        if savegame.xmlFile ~= nil then
+            self.scInflationPressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
+        end
     end
 
     self.scInCabTirePressureControl = Utils.getNoNil(getXMLBool(self.xmlFile, "vehicle.scInCabTirePressureControl"), false)
@@ -103,7 +105,7 @@ function scTirePressure:update(dt)
     if self.isClient and self:getIsActiveForInput(false) and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
         g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SOILCOMPACTION_TIRE_PRESSURE)
 
-        if InputBinding.hasEvent(InputBinding.SEASONS_TIRE_PRESSURE) then
+        if InputBinding.hasEvent(InputBinding.SOILCOMPACTION_TIRE_PRESSURE) then
             self:toggleTirePressure()
         end
     end

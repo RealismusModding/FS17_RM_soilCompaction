@@ -197,16 +197,22 @@ function scSoilCompaction:getCompactionLayers(wheel, width, length, radius, delt
 end
 
 function scSoilCompaction:update(dt)
-    if not g_seasons.soilCompaction.enabled then return end
 
     if self.lastSpeedReal ~= 0
         and g_currentMission:getIsServer()
-        and not ssWeatherManager:isGroundFrozen()
         and not SpecializationUtil.hasSpecialization(Cultivator, self.specializations) then
-        self:applySoilCompaction()
+        
+        if g_seasons ~= nil then
+            if not g_seasons.weather:isGroundFrozen() then
+                self:applySoilCompaction()
+            end
+        else
+            self:applySoilCompaction()
+        end
     end
 
-    if self.ssCompactionIndicatorIsCorrect and self:isPlayerInRange() then
+    local isInRange = SpecializationUtil.callSpecializationsFunction("isPlayerInRange")
+    if self.ssCompactionIndicatorIsCorrect and isInRange then
         local worstCompaction = 4
         for _, wheel in pairs(self.wheels) do
             -- fallback to 'no compaction'
