@@ -211,8 +211,7 @@ function scSoilCompaction:update(dt)
         end
     end
 
-    -- Not sure why self:isPlayerInRange() does not work
-    if self.scCompactionIndicatorIsCorrect and self.scPlayerInRange ~= nil then
+    if self.scCompactionIndicatorIsCorrect and self:isPlayerInRange() then
         local worstCompaction = 4
         for _, wheel in pairs(self.wheels) do
             -- fallback to 'no compaction'

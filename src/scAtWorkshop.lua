@@ -16,6 +16,10 @@ function scAtWorkshop:prerequisitesPresent(specializations)
 end
 
 function scAtWorkshop:load(savegame)
+    self.isPlayerInRange = scAtWorkshop.isPlayerInRange
+    self.isAtWorkshop = scAtWorkshop.isAtWorkshop
+    self.getWorkshop = scAtWorkshop.getWorkshop
+    self.canPlayerInteractInWorkshop = scAtWorkshop.canPlayerInteractInWorkshop
 end
 
 function scAtWorkshop:delete()
