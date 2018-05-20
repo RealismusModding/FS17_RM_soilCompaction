@@ -40,30 +40,30 @@ function scAirCompressorPlaceable:load(xmlFilename, x,y,z, rx,ry,rz, initRandom)
     self.actionRadius = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.actionRadius#distance"), 15)
     self.airDistance = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.airDistance"), 10)
     self.pricePerSecond = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.pricePerSecond"), 10)
-    self.inflationMultiplier = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.inflationMultiplier"), 0.015)
+    self.inflationMultiplier = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.inflationMultiplier"), 0.005)
+    self.deflationMultiplier = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.deflationMultiplier"), 0.015)
 
-    self.lanceNode = Utils.indexToObject(self.nodeId, getXMLString(xmlFile, "placeable.airCompressor.lance#index"))
-    self.linkPosition = Utils.getVectorNFromString(Utils.getNoNil(getXMLString(xmlFile, "placeable.airCompressor.lance#position"), "0 0 0"), 3)
-    self.linkRotation = Utils.getRadiansFromString(Utils.getNoNil(getXMLString(xmlFile, "placeable.airCompressor.lance#rotation"), "0 0 0"), 3)
-    self.lanceNodeParent = getParent(self.lanceNode)
-    self.lanceRaycastNode = Utils.indexToObject(self.nodeId, getXMLString(xmlFile, "placeable.airCompressor.lance#raycastNode"))
-
+    self.nozzleNode = Utils.indexToObject(self.nodeId, getXMLString(xmlFile, "placeable.airCompressor.nozzle#index"))
+    self.linkPosition = Utils.getVectorNFromString(Utils.getNoNil(getXMLString(xmlFile, "placeable.airCompressor.nozzle#position"), "0 0 0"), 3)
+    self.linkRotation = Utils.getRadiansFromString(Utils.getNoNil(getXMLString(xmlFile, "placeable.airCompressor.nozzle#rotation"), "0 0 0"), 3)
+    self.nozzleNodeParent = getParent(self.nozzleNode)
+    self.nozzleRaycastNode = Utils.indexToObject(self.nodeId, getXMLString(xmlFile, "placeable.airCompressor.nozzle#raycastNode"))
 
     if self.isClient then
         --self.sampleCompressorSound = SoundUtil.loadSample(xmlFile, {}, "placeable.airCompressor.compressorSound", "$data/placeables/woodCrusher/jenz/jenzHE700motor_idle.wav", self.baseDirectory, self.nodeId)
         self.sampleCompressorSound = SoundUtil.loadSample(xmlFile, {}, "placeable.airCompressor.compressorSound", "$data/sounds/engine/runHP120.wav", self.baseDirectory, self.nodeId)
         self.sampleCompressorStop = SoundUtil.loadSample(xmlFile, {}, "placeable.airCompressor.compressorStop", "$data/sounds/technicalAccessories/pressure_regulator.wav", self.baseDirectory, self.nodeId)
-        self.sampleAirSound = SoundUtil.loadSample(xmlFile, {}, "vehicle.tirePressure.airSound", "$data/maps/sounds/siloFillSound.wav", self.baseDirectory, self.lanceNode)
+        self.sampleAirSound = SoundUtil.loadSample(xmlFile, {}, "vehicle.tirePressure.airSound", "$data/maps/sounds/siloFillSound.wav", self.baseDirectory, self.nozzleNode)
         self.sampleStopAirSound = SoundUtil.loadSample(xmlFile, {}, "vehicle.tirePressure.stopSound", "$data/sounds/technicalAccessories/brakeBig.wav", self.baseDirectory, self.nodeId)
     end
 
     delete(xmlFile)
 
     self.isPlayerInRange = false
-    self.isTurnedOn = false -- making sound, holding lance
-    self.isTurningOff = false -- making no sound, not holding lance
+    self.isTurnedOn = false -- making sound, holding nozzle gun
+    self.isTurningOff = false -- making no sound, not holding nozzle gun
 
-    -- The lance that can be activated
+    -- The nozzle gun that can be activated
     self.activatable = scAirCompressorPlaceableActivatable:new(self)
 
     -- To check distance between compressor and player
@@ -151,8 +151,8 @@ function scAirCompressorPlaceable:update(dt)
         if self.isTurnedOn and self.doFlating then
             self.foundVehicle = nil
 
-            if self.lanceRaycastNode ~= nil then
-                self:flateVehicle(self.lanceRaycastNode, dt)
+            if self.nozzleRaycastNode ~= nil then
+                self:flateVehicle(self.nozzleRaycastNode, dt)
             else
                 self:flateVehicle(self.currentPlayer.cameraNode, dt)
             end
@@ -189,9 +189,15 @@ function scAirCompressorPlaceable:flateVehicle(node, dt)
     raycastAll(x, y, z, dx, dy, dz, "airRaycastCallback", self.airDistance, self, 32 + 64 + 128 + 256 + 4096 + 8194)
 
     if self.foundVehicle ~= nil then
-        local change = self.flateDirection * dt * self.inflationMultiplier
+        local change = dt * self.inflationMultiplier
+        if self.flateDirection == -1 then
+            change = self.flateDirection * dt * self.deflationMultiplier
+        end
 
         self.foundVehicle:setInflationPressure(self.foundVehicle:getInflationPressure() + change)
+        for _, wheel in pairs(self.foundVehicle.wheels) do
+            self.foundVehicle:calculateSoilCompaction(wheel)
+        end
     end
 end
 
@@ -229,7 +235,7 @@ function scAirCompressorPlaceable:setIsInflating(doInflating, doDeflating, force
                 if doFlating == doInflating then
                     SoundUtil.play3DSample(self.sampleAirSound)
                     SoundUtil.setSamplePitch(self.sampleAirSound, 1)
-                elseif self.foundVehicle ~= nil then
+                elseif doFlating == doDeflating then
                     SoundUtil.play3DSample(self.sampleAirSound)
                     SoundUtil.setSamplePitch(self.sampleAirSound, 1.5)
                 end
@@ -269,23 +275,23 @@ function scAirCompressorPlaceable:setIsTurnedOn(isTurnedOn, player, noEventSend)
 
             -- player stuff
             local tool = {}
-            tool.node = self.lanceNode
+            tool.node = self.nozzleNode
             link(player.toolsRootNode, tool.node)
             setVisibility(tool.node, false)
             setTranslation(tool.node, unpack(self.linkPosition))
             setRotation(tool.node, unpack(self.linkRotation))
-            tool.update = scAirCompressorPlaceable.updateLance
-            tool.updateTick = scAirCompressorPlaceable.updateTickLance
-            tool.delete = scAirCompressorPlaceable.deleteLance
-            tool.draw = scAirCompressorPlaceable.drawLance
-            tool.onActivate = scAirCompressorPlaceable.activateLance
-            tool.onDeactivate = scAirCompressorPlaceable.deactivateLance
+            tool.update = scAirCompressorPlaceable.updateNozzle
+            tool.updateTick = scAirCompressorPlaceable.updateTickNozzle
+            tool.delete = scAirCompressorPlaceable.deleteNozzle
+            tool.draw = scAirCompressorPlaceable.drawNozzle
+            tool.onActivate = scAirCompressorPlaceable.activateNozzle
+            tool.onDeactivate = scAirCompressorPlaceable.deactivateNozzle
             tool.targets = self.targets
             tool.owner = self
             tool.static = false
             self.tool = tool
             self.currentPlayer:setTool(tool)
-            self.currentPlayer.hasHPWLance = true
+            self.currentPlayer.hasNozzleGun = true
 
             if self.isClient then
                 -- if self.sampleSwitch ~= nil and self:getIsActiveForSound() then
@@ -298,7 +304,7 @@ function scAirCompressorPlaceable:setIsTurnedOn(isTurnedOn, player, noEventSend)
                 if self.isTurningOff then
                     self.isTurningOff = false
                 end
-                setVisibility(self.lanceNode, g_currentMission.player == player)
+                setVisibility(self.nozzleNode, g_currentMission.player == player)
             end
         else
             self:onDeactivate()
@@ -317,13 +323,13 @@ function scAirCompressorPlaceable:onDeactivate()
     end
 
     self.isTurnedOn = false
-    setVisibility(self.lanceNode, true)
+    setVisibility(self.nozzleNode, true)
     self:setIsInflating(false, false, true, true)
 
     -- Remove tool from player
     if self.currentPlayer ~= nil then
         self.currentPlayer:setToolById(0, true)
-        self.currentPlayer.hasHPWLance = false
+        self.currentPlayer.hasNozzleGun = false
     end
 
     if self.isClient then
@@ -334,10 +340,10 @@ function scAirCompressorPlaceable:onDeactivate()
         self.isTurningOff = true
         self.turnOffTime = g_currentMission.time + self.turnOffDuration
 
-        -- Reset lance node
-        link(self.lanceNodeParent, self.lanceNode)
-        setTranslation(self.lanceNode, 0,0,0)
-        setRotation(self.lanceNode, 0,0,0)
+        -- Reset nozzle node
+        link(self.nozzleNodeParent, self.nozzleNode)
+        setTranslation(self.nozzleNode, 0,0,0)
+        setRotation(self.nozzleNode, 0,0,0)
     end
 
     self.currentPlayer = nil
@@ -395,22 +401,22 @@ end
 registerPlaceableType("scAirCompressor", scAirCompressorPlaceable)
 
 ----------------------
--- Lance player tool
+-- Nozzle Gun player tool
 ----------------------
 
-function scAirCompressorPlaceable.activateLance(tool)
+function scAirCompressorPlaceable.activateNozzle(tool)
     setVisibility(tool.node, true)
 end
 
-function scAirCompressorPlaceable.deactivateLance(tool)
+function scAirCompressorPlaceable.deactivateNozzle(tool)
     tool.owner:setIsTurnedOn(false, nil)
 end
 
-function scAirCompressorPlaceable.deleteLance(tool)
+function scAirCompressorPlaceable.deleteNozzle(tool)
     tool.owner:setIsTurnedOn(false, nil)
 end
 
-function scAirCompressorPlaceable.drawLance(tool)
+function scAirCompressorPlaceable.drawNozzle(tool)
     local compressor = tool.owner
 
     if compressor.currentPlayer == g_currentMission.player then
@@ -423,7 +429,7 @@ function scAirCompressorPlaceable.drawLance(tool)
     end
 end
 
-function scAirCompressorPlaceable.updateLance(tool, dt, allowInput)
+function scAirCompressorPlaceable.updateNozzle(tool, dt, allowInput)
     if allowInput then
         tool.owner:setIsInflating(InputBinding.isPressed(InputBinding.ACTIVATE_HANDTOOL),
                                   InputBinding.isPressed(InputBinding.ACTIVATE_HANDTOOL2),
@@ -431,7 +437,7 @@ function scAirCompressorPlaceable.updateLance(tool, dt, allowInput)
     end
 end
 
-function scAirCompressorPlaceable.updateTickLance(tool, dt, allowInput)
+function scAirCompressorPlaceable.updateTickNozzle(tool, dt, allowInput)
 end
 
 ----------------------
@@ -468,7 +474,7 @@ function scAirCompressorPlaceableActivatable:getIsActivatable()
         return false
     end
 
-    if not self.airCompressor.isTurnedOn and g_currentMission.player.hasHPWLance == true then
+    if not self.airCompressor.isTurnedOn and g_currentMission.player.hasNozzleGun == true then
         return false
     end
 

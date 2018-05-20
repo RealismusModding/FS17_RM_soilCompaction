@@ -120,7 +120,7 @@
     </inputBindings>
     
     <storeItems>
-        <storeItem rootNode="placeable" xmlFilename="resources/placeables/wopstr700/wopstr700.xml" />
+        <storeItem rootNode="placeable" xmlFilename="resources/compressor.xml" />
     </storeItems>
 </modDesc>
 
