@@ -42,6 +42,11 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     
     local width = wheel.width
     local radius = wheel.radius
+
+    if wheel.radiusOriginal ~= nil then
+        radius = wheel.radiusOriginal
+    end
+
     local length = math.max(0.1, 0.35 * radius)
 
     wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
@@ -107,6 +112,12 @@ function scSoilCompaction:applySoilCompaction()
 
             local width = wheel.width
             local radius = wheel.radius
+
+            -- 4Real Ground Response changes radius of the wheel, but keeps also the original
+            if wheel.radiusOriginal ~= nil then
+                radius = wheel.radiusOriginal
+            end
+
             local length = math.max(0.1, 0.35 * radius)
             --local contactArea = length * width
             local penetrationResistance = 4e5 / (20 + (g_currentMission.environment.groundWetness * 100 + 5)^2)
