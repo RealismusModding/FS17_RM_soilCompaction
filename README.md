@@ -22,3 +22,8 @@ Mod equipment can be set to be deep acting cultivators or subsoilers by adding o
 Multiple passes with a cultivator will not have an increased effect. Only the first pass is accounted for the decompacting the soil.
 
 Cultivating fully grown oilseed radish will decompact the soil one addition level.
+
+## Tire pressure
+The ground pressure is determined by the load each wheel transmits to the ground and the contact area. The contact area is generally determined by the radius and width of the wheel and the tire pressure. Lower tire pressure increases the contact area and decreases the ground pressure and soil compaction.
+
+It is possible to change the tire pressure on all Motorized equipment that has wheels. The default tire pressure is 1.8 bar (180 kPa) and it is possible to reduce it down to 0.8 bar (80 kPa) by using an air compressor. The air compressor, Wopstr A700, can be bought under category "Placeables" and is moveable. Start the air compressor and inflate or deflate the wheels. For simplicity, all wheels are set to same the tire pressure.
