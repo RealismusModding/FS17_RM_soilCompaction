@@ -73,7 +73,6 @@ function scAirCompressorPlaceable:load(xmlFilename, x,y,z, rx,ry,rz, initRandom)
     self.turnOffTime = 0
     self.turnOffDuration = 1000
 
-
     return true
 end
 
@@ -198,6 +197,7 @@ function scAirCompressorPlaceable:flateVehicle(node, dt)
         for _, wheel in pairs(self.foundVehicle.wheels) do
             self.foundVehicle:calculateSoilCompaction(wheel)
         end
+         WheelsUtil.updateWheelsGraphics(self.foundVehicle, dt)
     end
 end
 
