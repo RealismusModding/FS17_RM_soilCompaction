@@ -134,7 +134,7 @@ function scCompactionManager.updateCultivatorArea(superFunc, x, z, x1, z1, x2, z
     setDensityMaskParams(detailId, "greater", 0)
     setDensityCompareParams(detailId, "greater", -1)
 
-    return superFunc(x, z, x1, z1, x2, z2, ...)
+    return superFunc(x, z, x1, z1, x2, z2, forced, commonForced, angle, delta)
 end
 
 -- Draw all the different states of compaction in overlay menu
