@@ -21,4 +21,4 @@ Mod equipment can be set to be deep acting cultivators or subsoilers by adding o
 
 Multiple passes with a cultivator will not have an increased effect. Only the first pass is accounted for the decompacting the soil.
 
-Cultivating oilseed radish that has grown will decompact the soil one addition level.
+Cultivating fully grown oilseed radish will decompact the soil one addition level.
