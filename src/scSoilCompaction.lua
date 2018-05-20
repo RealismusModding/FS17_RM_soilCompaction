@@ -24,10 +24,6 @@ function scSoilCompaction:load(savegame)
     self.calculateSoilCompaction = scSoilCompaction.calculateSoilCompaction
     self.getCompactionLayers = scSoilCompaction.getCompactionLayers
     self.getTireMaxLoad = scSoilCompaction.getTireMaxLoad
-
-    self.scCompactionIndicatorIsCorrect = false
-
-    Utils.updateCultivatorArea = Utils.overwrittenFunction(Utils.updateCultivatorArea, scCompactionManager.updateCompactionCultivatorArea)
 end
 
 function scSoilCompaction:delete()
@@ -99,7 +95,6 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     elseif soilBulkDensityRef > scSoilCompaction.HEAVY_COMPACTION then
         wheel.possibleCompaction = 0
     end
-    self.scCompactionIndicatorIsCorrect = true
 
     --below only for debug print. TODO: remove when done
     wheel.soilBulkDensity = soilBulkDensityRef

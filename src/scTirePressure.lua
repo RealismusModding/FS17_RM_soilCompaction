@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- TIRE PRESSURE SPECIALIZATION
 ----------------------------------------------------------------------------------------------------
--- Authors:  Rahkiin, reallogger
+-- Authors:  Rahkiin, reallogger, Wopster
 --
 -- Copyright (c) Realismus Modding, 2017
 ----------------------------------------------------------------------------------------------------
@@ -14,6 +14,10 @@ scTirePressure.PRESSURE_MIN = 80
 scTirePressure.PRESSURE_LOW = 80
 scTirePressure.PRESSURE_NORMAL = 180
 scTirePressure.PRESSURE_MAX = 180
+
+scTirePressure.INCREASE = 0.25
+
+local PARAM_MORPH = "morphPosition"
 
 function scTirePressure:prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(Motorized, specializations) and
@@ -32,6 +36,7 @@ function scTirePressure:load(savegame)
     self.setInflationPressure = scTirePressure.setInflationPressure
     self.doCheckSpeedLimit = Utils.overwrittenFunction(self.doCheckSpeedLimit, scTirePressure.doCheckSpeedLimit)
     self.toggleTirePressure = scTirePressure.toggleTirePressure
+    WheelsUtil.updateWheelGraphics = Utils.appendedFunction(WheelsUtil.updateWheelGraphics, scTirePressure.updatePressureWheelGraphics)
 
     if savegame ~= nil then
         if savegame.xmlFile ~= nil then
@@ -91,12 +96,10 @@ function scTirePressure:updateInflationPressure()
             end
 
             wheel.scMaxLoad = self:getTireMaxLoad(wheel, self.scInflationPressure)
+            
             wheel.maxDeformation = wheel.scMaxDeformation * scTirePressure.PRESSURE_NORMAL / self.scInflationPressure
         end
     end
-
-    -- Update compaction indicator
-    self.scCompactionIndicatorIsCorrect = false
 end
 
 function scTirePressure:update(dt)
@@ -116,6 +119,9 @@ function scTirePressure:toggleTirePressure()
 end
 
 function scTirePressure:draw()
+    --if self.isEntered then
+    --    renderText(0.44, 0.78, 0.01, "limit = " .. tostring(self.motor.maxForwardSpeed))
+    --end
 end
 
 function scTirePressure:getInflationPressure()
@@ -129,8 +135,6 @@ function scTirePressure:setInflationPressure(pressure, noEventSend)
 
     if self.scInflationPressure ~= old then
         self:updateInflationPressure()
-
-        -- TODO: Send event
     end
 end
 
@@ -143,13 +147,44 @@ function scTirePressure:doCheckSpeedLimit(superFunc)
     return parent or self.scInflationPressure < scTirePressure.PRESSURE_NORMAL
 end
 
-function scTirePressure:getSpeedLimit()
-    local limit = 1000
+function scTirePressure:getPressureSpeedLimit()
+    local maxSpeed = self.motor.maxForwardSpeed
+    local limit = maxSpeed - 10
+    self.speedLimit = (self.scInflationPressure - scTirePressure.PRESSURE_MIN) / (scTirePressure.PRESSURE_MAX - scTirePressure.PRESSURE_MIN ) + 10
+    self.motor.speedLimit = self.speedLimit
+end
 
-    -- TODO: linear from normal speed (what is 'normal speed'?)
-    if self.scInflationPressure == scTirePressure.PRESSURE_LOW then
-        return 10
+function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive, suspensionLength)
+    if self.scInflationPressure ~= nil and not self.mrIsMrVehicle then
+        if wheel.wheelTire ~= nil then
+            local tireTypeCrawler = WheelsUtil.getTireType("crawler")
+
+            if wheel.tireType ~= tireTypeCrawler then
+                local x, y, z, _ = getShaderParameter(wheel.wheelTire, PARAM_MORPH)
+                local deformation = Utils.clamp((wheel.deltaY + 0.04 - suspensionLength) * (scTirePressure.INCREASE + (self.scInflationPressure - 80) / 100), 0, wheel.maxDeformation)
+                deformation = wheel.maxDeformation
+                -- Redo the shader morph for better graphical display.. could have just clamped the maxDeformation value but that doesn't really give the correct visual feeling.
+                setShaderParameter(wheel.wheelTire, PARAM_MORPH, x, y, z, deformation, false)
+
+                if wheel.additionalWheels ~= nil then
+                    for _, additionalWheel in pairs(wheel.additionalWheels) do
+                        local x, y, z, _ = getShaderParameter(additionalWheel.wheelTire, PARAM_MORPH)
+                        setShaderParameter(additionalWheel.wheelTire, PARAM_MORPH, x, y, z, deformation, false)
+                    end
+                end
+
+                suspensionLength = suspensionLength + deformation
+            end
+        end
+
+        suspensionLength = suspensionLength - wheel.deltaY
+
+	    local dirX, dirY, dirZ = 0, -1, 0
+
+        if wheel.repr ~= wheel.driveNode then
+            dirX, dirY, dirZ = localDirectionToLocal(wheel.repr, getParent(wheel.repr), 0, -1, 0)
+        end
+        setTranslation(wheel.repr, wheel.startPositionX + dirX*suspensionLength, wheel.startPositionY + dirY*suspensionLength, wheel.startPositionZ + dirZ*suspensionLength)
+
     end
-
-    return limit
 end

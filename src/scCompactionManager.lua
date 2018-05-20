@@ -46,6 +46,7 @@ function scCompactionManager:installVehicleSpecializations()
 end
 
 function scCompactionManager:load(savegame, key)
+    Utils.updateCultivatorArea = Utils.overwrittenFunction(Utils.updateCultivatorArea, scCompactionManager.updateCompactionCultivatorArea)
 end
 
 function scCompactionManager:save(savegame, key)
