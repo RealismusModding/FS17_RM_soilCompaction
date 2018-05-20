@@ -2,7 +2,7 @@
 -- AIR COMPRESSOR
 ----------------------------------------------------------------------------------------------------
 -- Purpose:
--- Authors:  Rahkiin
+-- Authors:  Rahkiin, reallogger, Wopster
 --
 -- Note: bulk of the code is from the high pressure washer, which has similar features.
 --
@@ -49,6 +49,14 @@ function scAirCompressorPlaceable:load(xmlFilename, x,y,z, rx,ry,rz, initRandom)
     self.lanceRaycastNode = Utils.indexToObject(self.nodeId, getXMLString(xmlFile, "placeable.airCompressor.lance#raycastNode"))
 
 
+    if self.isClient then
+        --self.sampleCompressorSound = SoundUtil.loadSample(xmlFile, {}, "placeable.airCompressor.compressorSound", "$data/placeables/woodCrusher/jenz/jenzHE700motor_idle.wav", self.baseDirectory, self.nodeId)
+        self.sampleCompressorSound = SoundUtil.loadSample(xmlFile, {}, "placeable.airCompressor.compressorSound", "$data/sounds/engine/runHP120.wav", self.baseDirectory, self.nodeId)
+        self.sampleCompressorStop = SoundUtil.loadSample(xmlFile, {}, "placeable.airCompressor.compressorStop", "$data/sounds/technicalAccessories/pressure_regulator.wav", self.baseDirectory, self.nodeId)
+        self.sampleAirSound = SoundUtil.loadSample(xmlFile, {}, "vehicle.tirePressure.airSound", "$data/maps/sounds/siloFillSound.wav", self.baseDirectory, self.lanceNode)
+        self.sampleStopAirSound = SoundUtil.loadSample(xmlFile, {}, "vehicle.tirePressure.stopSound", "$data/sounds/technicalAccessories/brakeBig.wav", self.baseDirectory, self.nodeId)
+    end
+
     delete(xmlFile)
 
     self.isPlayerInRange = false
@@ -63,7 +71,8 @@ function scAirCompressorPlaceable:load(xmlFilename, x,y,z, rx,ry,rz, initRandom)
 
     -- Sound animation for turning off
     self.turnOffTime = 0
-    self.turnOffDuration = 500
+    self.turnOffDuration = 1000
+
 
     return true
 end
@@ -154,21 +163,23 @@ function scAirCompressorPlaceable:update(dt)
         end
     end
 
-    -- if self.isTurningOff then
-    --     if g_currentMission.time < self.turnOffTime then
-    --         if self.sampleCompressor ~= nil then
-    --             local pitch = Utils.lerp(self.compressorPitchMin, self.sampleCompressor.pitchOffset, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
-    --             local volume = Utils.lerp(0, self.sampleCompressor.volume, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
-    --             SoundUtil.setSamplePitch(self.sampleCompressor, pitch)
-    --             SoundUtil.setSampleVolume(self.sampleCompressor, volume)
-    --         end
-    --     else
-    --         self.isTurningOff = false
-    --         if self.sampleCompressor ~= nil then
-    --             SoundUtil.stop3DSample(self.sampleCompressor)
-    --         end
-    --     end
-    -- end
+    if self.isTurningOff then
+         if g_currentMission.time < self.turnOffTime then
+             if self.sampleCompressorSound ~= nil then
+                 local pitch = Utils.lerp(0.5, 2, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
+                 local volume = Utils.lerp(0, 1, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
+                 SoundUtil.setSamplePitch(self.sampleCompressorSound, pitch)
+                 SoundUtil.setSampleVolume(self.sampleCompressorSound, volume)
+                 SoundUtil.play3DSample(self.sampleCompressorStop)
+             end
+         else
+             self.isTurningOff = false
+             if self.sampleCompressorSound ~= nil then
+                 SoundUtil.stop3DSample(self.sampleCompressorSound)
+                 SoundUtil.stop3DSample(self.sampleCompressorStop)
+             end
+         end
+     end
 end
 
 function scAirCompressorPlaceable:flateVehicle(node, dt)
@@ -215,6 +226,13 @@ function scAirCompressorPlaceable:setIsInflating(doInflating, doDeflating, force
             -- end
 
             if doFlating then
+                if doFlating == doInflating then
+                    SoundUtil.play3DSample(self.sampleAirSound)
+                    SoundUtil.setSamplePitch(self.sampleAirSound, 1)
+                elseif self.foundVehicle ~= nil then
+                    SoundUtil.play3DSample(self.sampleAirSound)
+                    SoundUtil.setSamplePitch(self.sampleAirSound, 1.5)
+                end
                 -- EffectManager:setFillType(self.waterEffects, FillUtil.FILLTYPE_WATER)
                 -- EffectManager:startEffects(self.waterEffects)
 
@@ -224,6 +242,7 @@ function scAirCompressorPlaceable:setIsInflating(doInflating, doDeflating, force
                 --     end
                 -- end
             else
+                SoundUtil.stop3DSample(self.sampleAirSound)
                 -- if force then
                 --     EffectManager:resetEffects(self.waterEffects)
                 -- else
@@ -272,11 +291,10 @@ function scAirCompressorPlaceable:setIsTurnedOn(isTurnedOn, player, noEventSend)
                 -- if self.sampleSwitch ~= nil and self:getIsActiveForSound() then
                 --     SoundUtil.playSample(self.sampleSwitch, 1, 0, nil)
                 -- end
-                -- if self.sampleCompressor ~= nil then
-                --     SoundUtil.setSamplePitch(self.sampleCompressor, self.sampleCompressor.pitchOffset)
-                --     SoundUtil.setSampleVolume(self.sampleCompressor, self.sampleCompressor.volume)
-                --     SoundUtil.play3DSample(self.sampleCompressor)
-                -- end
+                if self.sampleCompressorSound ~= nil then
+                    SoundUtil.play3DSample(self.sampleCompressorSound)
+                    SoundUtil.setSamplePitch(self.sampleCompressorSound, 2)
+                end
                 if self.isTurningOff then
                     self.isTurningOff = false
                 end
