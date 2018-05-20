@@ -15,7 +15,8 @@ Ploughs, rippers and subsoilers decompact from all levels of compaction to no co
 Cultivators decompact the soil depending on the type. Cultivators with discs decompact one level of soil compaction. Cultivators with tines can either decompact one or two levels of compaction, depending on setting. The cultivation depth of these cultivators can be changed when the cultivator is attached and active.
 
 Mod equipment can be set to be deep acting cultivators or subsoilers by adding one of the following in the vehicle.xml file:
-`<scCultivation>deep</scCultivation>`
-`<scCultivation>subsoiler</scCultivation>`
+
+    <scCultivation>deep</scCultivation>
+    <scCultivation>subsoiler</scCultivation>
 
 Multiple passes with a cultivator will not have an increased effect. Only the first pass is accounted for the decompacting the soil.
