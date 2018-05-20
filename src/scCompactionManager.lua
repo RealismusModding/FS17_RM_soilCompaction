@@ -112,8 +112,6 @@ end
 -- When running a cultivator, decompact a bit as well.
 -- The plough already decompacts in vanilla. Using a cultivator now allows being more effective.
 function scCompactionManager.updateCultivatorArea(superFunc, x, z, x1, z1, x2, z2, forced, commonForced, angle, delta)
-    local realArea, area = superFunc(x, z, x1, z1, x2, z2, forced, commonForced, angle)
-
     local detailId = g_currentMission.terrainDetailId
     local compactFirstChannel = g_currentMission.ploughCounterFirstChannel
     local compactNumChannels = g_currentMission.ploughCounterNumChannels
@@ -135,7 +133,7 @@ function scCompactionManager.updateCultivatorArea(superFunc, x, z, x1, z1, x2, z
     setDensityMaskParams(detailId, "greater", 0)
     setDensityCompareParams(detailId, "greater", -1)
 
-    return realArea, area
+    return superFunc(x, z, x1, z1, x2, z2, ...)
 end
 
 -- Draw all the different states of compaction in overlay menu
@@ -221,6 +219,6 @@ SpecializationUtil.registerSpecialization("atWorkshop", "scAtWorkshop", scCompac
 
 InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
 Utils.cutFruitArea = Utils.overwrittenFunction(Utils.cutFruitArea, scCompactionManager.cutFruitArea)
-Utils.updateCultivatorArea = Utils.overwrittenFunction(Utils.updateCultivatorArea, scCompactionManager.updateCultivatorArea)
+
 
 addModEventListener(scCompactionManager)

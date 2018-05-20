@@ -26,6 +26,8 @@ function scSoilCompaction:load(savegame)
     self.getTireMaxLoad = scSoilCompaction.getTireMaxLoad
 
     self.scCompactionIndicatorIsCorrect = false
+
+    Utils.updateCultivatorArea = Utils.overwrittenFunction(Utils.updateCultivatorArea, scCompactionManager.updateCompactionCultivatorArea)
 end
 
 function scSoilCompaction:delete()
@@ -229,8 +231,7 @@ function scSoilCompaction:update(dt)
         end
     end
 
-    self.scCompactionIndicatorIsCorrect = true
-    if self.scCompactionIndicatorIsCorrect and self:isPlayerInRange() then
+    if self:isPlayerInRange() then
         local worstCompaction = 4
         for _, wheel in pairs(self.wheels) do
             -- fallback to 'no compaction'
