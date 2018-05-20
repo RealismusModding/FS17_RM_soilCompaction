@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="37">
     <author>Realismus Modding</author>
-    <contributors>baron, Rahkiin, reallogger</contributors>
-    <version>1.0.0.0</version>
+    <contributors>baron, Rahkiin, reallogger, Wopster</contributors>
+    <version>0.0.0.1</version>
     <title>
         <en>Soil Compaction</en>
         <de>Soil Compaction</de>
