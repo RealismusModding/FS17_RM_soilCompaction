@@ -29,8 +29,8 @@ function scAirCompressorPlaceable:new(isServer, isClient, customMt)
     return self
 end
 
-function scAirCompressorPlaceable:load(xmlFilename, x,y,z, rx,ry,rz, initRandom)
-    if not scAirCompressorPlaceable:superClass().load(self, xmlFilename, x,y,z, rx,ry,rz, initRandom) then
+function scAirCompressorPlaceable:load(xmlFilename, x, y, z, rx, ry, rz, initRandom)
+    if not scAirCompressorPlaceable:superClass().load(self, xmlFilename, x, y, z, rx, ry, rz, initRandom) then
         return false
     end
 
@@ -67,7 +67,7 @@ function scAirCompressorPlaceable:load(xmlFilename, x,y,z, rx,ry,rz, initRandom)
     self.activatable = scAirCompressorPlaceableActivatable:new(self)
 
     -- To check distance between compressor and player
-    self.lastInRangePosition = {0, 0, 0}
+    self.lastInRangePosition = { 0, 0, 0 }
 
     -- Sound animation for turning off
     self.turnOffTime = 0
@@ -81,6 +81,10 @@ function scAirCompressorPlaceable:delete()
 
     if self.isClient then
         -- Delete effects, samples
+        SoundUtil.deleteSample(self.sampleCompressorSound)
+        SoundUtil.deleteSample(self.sampleCompressorStop)
+        SoundUtil.deleteSample(self.sampleAirSound)
+        SoundUtil.deleteSample(self.sampleStopAirSound)
     end
 
     unregisterObjectClassName(self)
@@ -126,18 +130,18 @@ function scAirCompressorPlaceable:update(dt)
         local isPlayerInRange = self:getIsPlayerInRange(self.actionRadius, self.currentPlayer)
 
         if isPlayerInRange then
-            self.lastInRangePosition = {getTranslation(self.currentPlayer.rootNode)}
+            self.lastInRangePosition = { getTranslation(self.currentPlayer.rootNode) }
         else
             -- Limit player movement
             local kx, _, kz = getWorldTranslation(self.nodeId)
             local px, py, pz = getWorldTranslation(self.currentPlayer.rootNode)
             local len = Utils.vector2Length(px - kx, pz - kz)
 
-            local x,y,z = unpack(self.lastInRangePosition)
+            local x, y, z = unpack(self.lastInRangePosition)
             x = kx + ((px - kx) / len) * (self.actionRadius - 0.00001 * dt)
             z = kz + ((pz - kz) / len) * (self.actionRadius - 0.00001 * dt)
             self.currentPlayer:moveToAbsoluteInternal(x, py, z)
-            self.lastInRangePosition = {x, y, z}
+            self.lastInRangePosition = { x, y, z }
 
             if not self.messageShown and self.currentPlayer == g_currentMission.player then
                 g_currentMission:showBlinkingWarning(g_i18n:getText("warning_compressorRangeRestriction"), 6000)
@@ -162,27 +166,27 @@ function scAirCompressorPlaceable:update(dt)
         end
     end
 
-    if self.isTurningOff then
-         if g_currentMission.time < self.turnOffTime then
-             if self.sampleCompressorSound ~= nil then
-                 local pitch = Utils.lerp(0.5, 2, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
-                 local volume = Utils.lerp(0, 1, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
-                 SoundUtil.setSamplePitch(self.sampleCompressorSound, pitch)
-                 SoundUtil.setSampleVolume(self.sampleCompressorSound, volume)
-                 SoundUtil.play3DSample(self.sampleCompressorStop)
-             end
-         else
-             self.isTurningOff = false
-             if self.sampleCompressorSound ~= nil then
-                 SoundUtil.stop3DSample(self.sampleCompressorSound)
-                 SoundUtil.stop3DSample(self.sampleCompressorStop)
-             end
-         end
-     end
+    if self.isClient and self.isTurningOff then
+        if g_currentMission.time < self.turnOffTime then
+            if self.sampleCompressorSound ~= nil then
+                local pitch = Utils.lerp(0.5, 2, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
+                local volume = Utils.lerp(0, 1, Utils.clamp((self.turnOffTime - g_currentMission.time) / self.turnOffDuration, 0, 1))
+                SoundUtil.setSamplePitch(self.sampleCompressorSound, pitch)
+                SoundUtil.setSampleVolume(self.sampleCompressorSound, volume)
+                SoundUtil.play3DSample(self.sampleCompressorStop)
+            end
+        else
+            self.isTurningOff = false
+            if self.sampleCompressorSound ~= nil then
+                SoundUtil.stop3DSample(self.sampleCompressorSound)
+                SoundUtil.stop3DSample(self.sampleCompressorStop)
+            end
+        end
+    end
 end
 
 function scAirCompressorPlaceable:flateVehicle(node, dt)
-    local x,y,z = getWorldTranslation(node)
+    local x, y, z = getWorldTranslation(node)
     local dx, dy, dz = localDirectionToWorld(node, 0, 0, -1)
 
     raycastAll(x, y, z, dx, dy, dz, "airRaycastCallback", self.airDistance, self, 32 + 64 + 128 + 256 + 4096 + 8194)
@@ -198,9 +202,8 @@ function scAirCompressorPlaceable:flateVehicle(node, dt)
             self.foundVehicle:calculateSoilCompaction(wheel)
             self.foundVehicle:updateWheelBase(wheel)
         end
-         WheelsUtil.updateWheelsGraphics(self.foundVehicle, dt)
-         --print_r(self.foundVehicle)
-
+        WheelsUtil.updateWheelsGraphics(self.foundVehicle, dt)
+        --print_r(self.foundVehicle)
     end
 end
 
@@ -224,7 +227,7 @@ function scAirCompressorPlaceable:setIsInflating(doInflating, doDeflating, force
     local doFlating = doInflating or doDeflating
     self.flateDirection = doInflating and 1 or -1
 
---     HPWPlaceableStateEvent.sendEvent(self, doWashing, noEventSend)
+    --     HPWPlaceableStateEvent.sendEvent(self, doWashing, noEventSend)
 
     if self.doFlating ~= doFlating then
         if self.isClient then
@@ -235,13 +238,10 @@ function scAirCompressorPlaceable:setIsInflating(doInflating, doDeflating, force
             -- end
 
             if doFlating then
-                if doFlating == doInflating then
-                    SoundUtil.play3DSample(self.sampleAirSound)
-                    SoundUtil.setSamplePitch(self.sampleAirSound, 1)
-                elseif doFlating == doDeflating then
-                    SoundUtil.play3DSample(self.sampleAirSound)
-                    SoundUtil.setSamplePitch(self.sampleAirSound, 1.5)
-                end
+                local pitch = doFlating == doDeflating and 1.5 or 1
+                SoundUtil.play3DSample(self.sampleAirSound)
+                SoundUtil.setSamplePitch(self.sampleAirSound, pitch)
+
                 -- EffectManager:setFillType(self.waterEffects, FillUtil.FILLTYPE_WATER)
                 -- EffectManager:startEffects(self.waterEffects)
 
@@ -345,8 +345,8 @@ function scAirCompressorPlaceable:onDeactivate()
 
         -- Reset nozzle node
         link(self.nozzleNodeParent, self.nozzleNode)
-        setTranslation(self.nozzleNode, 0,0,0)
-        setRotation(self.nozzleNode, 0,0,0)
+        setTranslation(self.nozzleNode, 0, 0, 0)
+        setRotation(self.nozzleNode, 0, 0, 0)
     end
 
     self.currentPlayer = nil
@@ -392,7 +392,7 @@ function scAirCompressorPlaceable:airRaycastCallback(hitActorId, x, y, z, distan
     end
 
     if vehicle ~= nil and vehicle.getInflationPressure ~= nil and vehicle.setInflationPressure ~= nil then
-        self.foundCoords = {x, y, z}
+        self.foundCoords = { x, y, z }
         self.foundVehicle = vehicle
 
         return false
@@ -406,7 +406,6 @@ registerPlaceableType("scAirCompressor", scAirCompressorPlaceable)
 ----------------------
 -- Nozzle Gun player tool
 ----------------------
-
 function scAirCompressorPlaceable.activateNozzle(tool)
     setVisibility(tool.node, true)
 end
@@ -435,8 +434,8 @@ end
 function scAirCompressorPlaceable.updateNozzle(tool, dt, allowInput)
     if allowInput then
         tool.owner:setIsInflating(InputBinding.isPressed(InputBinding.ACTIVATE_HANDTOOL),
-                                  InputBinding.isPressed(InputBinding.ACTIVATE_HANDTOOL2),
-                                  false, false)
+            InputBinding.isPressed(InputBinding.ACTIVATE_HANDTOOL2),
+            false, false)
     end
 end
 

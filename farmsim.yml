@@ -1,0 +1,30 @@
+name: SoilCompaction
+author: Realismus Modding
+contributors:
+  - theSeb
+  - Rahkiin
+  - reallogger
+  - mrbear
+  - baron
+  - Wopster
+zip_name: FS17_RM_SoilCompaction
+version: 1.0.0.0
+type: script
+
+code: src/
+
+resources:
+  - resources/
+
+templates:
+  debug: true
+  verbose: true
+  norestart: false
+  simpleVersion: 4
+
+release:
+  clean_translations: true
+  templates:
+    debug: false
+    verbose: false
+    norestart: false
