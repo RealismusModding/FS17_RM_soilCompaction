@@ -203,7 +203,7 @@ function scAirCompressorPlaceable:flateVehicle(node, dt)
             self.foundVehicle:updateWheelBase(wheel)
         end
         WheelsUtil.updateWheelsGraphics(self.foundVehicle, dt)
-        --print_r(self.foundVehicle)
+
     end
 end
 
@@ -239,7 +239,9 @@ function scAirCompressorPlaceable:setIsInflating(doInflating, doDeflating, force
 
             if doFlating then
                 local pitch = doFlating == doDeflating and 1.5 or 1
-                SoundUtil.play3DSample(self.sampleAirSound)
+                if doInflating or self.foundVehicle ~= nil then
+                    SoundUtil.play3DSample(self.sampleAirSound)
+                end
                 SoundUtil.setSamplePitch(self.sampleAirSound, pitch)
 
                 -- EffectManager:setFillType(self.waterEffects, FillUtil.FILLTYPE_WATER)
