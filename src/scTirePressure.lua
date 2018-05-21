@@ -16,12 +16,13 @@ scTirePressure.PRESSURE_NORMAL = 180
 scTirePressure.PRESSURE_MAX = 180
 
 scTirePressure.INCREASE = 0.25
+scTirePressure.FLATE_MULTIPLIER = 0.01
 
 local PARAM_MORPH = "morphPosition"
 
 function scTirePressure:prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(Motorized, specializations) and
-           --SpecializationUtil.hasSpecialization(ssAtWorkshop, specializations) and
+           SpecializationUtil.hasSpecialization(ssAtWorkshop, specializations) and
            SpecializationUtil.hasSpecialization(scSoilCompaction, specializations)
 end
 
@@ -106,10 +107,17 @@ function scTirePressure:update(dt)
     -- self.scInCabTirePressureControl = true
 
     if self.isClient and self:getIsActiveForInput(false) and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
-        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SOILCOMPACTION_TIRE_PRESSURE)
+        --g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SOILCOMPACTION_TIRE_PRESSURE)
+        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"), InputBinding.SOILCOMPACTION_TIRE_INFLATE)
+        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"), InputBinding.SOILCOMPACTION_TIRE_DEFLATE)
+        g_currentMission:addExtraPrintText(string.format(g_i18n:getText("info_TIRE_PRESSURE"), compressor.foundVehicle:getInflationPressure()))
 
-        if InputBinding.hasEvent(InputBinding.SOILCOMPACTION_TIRE_PRESSURE) then
-            self:toggleTirePressure()
+        local change = dt * scTirePressure.FLATE_MULTIPLIER
+        if InputBinding.hasEvent(InputBinding.SOILCOMPACTION_TIRE_INFLATE) then
+            --self:toggleTirePressure()
+            self:setInflationPressure(self:getInflationPressure() + change)
+        elseif InputBinding.hasEvent(InputBinding.SOILCOMPACTION_TIRE_DEFLATE) then
+            self:setInflationPressure(self:getInflationPressure() - change)
         end
     end
 end
