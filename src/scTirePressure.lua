@@ -22,8 +22,8 @@ local PARAM_MORPH = "morphPosition"
 
 function scTirePressure:prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(Motorized, specializations) and
-           SpecializationUtil.hasSpecialization(ssAtWorkshop, specializations) and
-           SpecializationUtil.hasSpecialization(scSoilCompaction, specializations)
+            SpecializationUtil.hasSpecialization(ssAtWorkshop, specializations) and
+            SpecializationUtil.hasSpecialization(scSoilCompaction, specializations)
 end
 
 function scTirePressure:preLoad()
@@ -46,8 +46,8 @@ function scTirePressure:load(savegame)
     end
 
     self.scInCabTirePressureControl = Utils.getNoNil(getXMLBool(self.xmlFile, "vehicle.scInCabTirePressureControl"), false)
-
     self.scAllWheelsCrawlers = true
+
     local tireTypeCrawler = WheelsUtil.getTireType("crawler")
     for _, wheel in pairs(self.wheels) do
         if wheel.tireType ~= tireTypeCrawler then
@@ -61,10 +61,10 @@ end
 function scTirePressure:delete()
 end
 
-function scTirePressure:mouseEvent(posX, posY, isDown, isUp, button)
+function scTirePressure:mouseEvent(...)
 end
 
-function scTirePressure:keyEvent(unicode, sym, modifier, isDown)
+function scTirePressure:keyEvent(...)
 end
 
 function scTirePressure:loadFromAttributesAndNodes(xmlFile, key)
@@ -74,7 +74,7 @@ end
 function scTirePressure:getSaveAttributesAndNodes(nodeIdent)
     local attributes = ""
 
-    attributes = attributes .. "scInflationPressure=\"" .. self.scInflationPressure ..  "\" "
+    attributes = attributes .. "scInflationPressure=\"" .. self.scInflationPressure .. "\" "
 
     return attributes, ""
 end
@@ -93,11 +93,11 @@ function scTirePressure:updateInflationPressure()
     for _, wheel in pairs(self.wheels) do
         if wheel.tireType ~= tireTypeCrawler then
             if wheel.scMaxDeformation == nil then
-                wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation,0)
+                wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation, 0)
             end
 
             wheel.scMaxLoad = self:getTireMaxLoad(wheel, self.scInflationPressure)
-            
+
             wheel.maxDeformation = wheel.scMaxDeformation * scTirePressure.PRESSURE_NORMAL / self.scInflationPressure
         end
     end
@@ -108,8 +108,8 @@ function scTirePressure:update(dt)
 
     if self.isClient and self:getIsActiveForInput(false) and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
         --g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SOILCOMPACTION_TIRE_PRESSURE)
-        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"), InputBinding.SOILCOMPACTION_TIRE_INFLATE)
-        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"), InputBinding.SOILCOMPACTION_TIRE_DEFLATE)
+        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"), InputBinding.SOILCOMPACTION_TIRE_INFLATE))
+        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"), InputBinding.SOILCOMPACTION_TIRE_DEFLATE))
         g_currentMission:addExtraPrintText(string.format(g_i18n:getText("info_TIRE_PRESSURE"), compressor.foundVehicle:getInflationPressure()))
 
         local change = dt * scTirePressure.FLATE_MULTIPLIER
@@ -137,6 +137,8 @@ function scTirePressure:getInflationPressure()
 end
 
 function scTirePressure:setInflationPressure(pressure, noEventSend)
+    SetInflationPressureEvent.sendEvent(self, pressure, noEventSend)
+
     local old = self.scInflationPressure
 
     self.scInflationPressure = Utils.clamp(pressure, scTirePressure.PRESSURE_MIN, scTirePressure.PRESSURE_MAX)
@@ -158,7 +160,7 @@ end
 function scTirePressure:getPressureSpeedLimit()
     local maxSpeed = self.motor.maxForwardSpeed
     local limit = maxSpeed - 10
-    self.speedLimit = (self.scInflationPressure - scTirePressure.PRESSURE_MIN) / (scTirePressure.PRESSURE_MAX - scTirePressure.PRESSURE_MIN ) + 10
+    self.speedLimit = (self.scInflationPressure - scTirePressure.PRESSURE_MIN) / (scTirePressure.PRESSURE_MAX - scTirePressure.PRESSURE_MIN) + 10
     self.motor.speedLimit = self.speedLimit
 end
 
@@ -187,12 +189,60 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
 
         suspensionLength = suspensionLength - wheel.deltaY
 
-	    local dirX, dirY, dirZ = 0, -1, 0
+        local dirX, dirY, dirZ = 0, -1, 0
 
         if wheel.repr ~= wheel.driveNode then
             dirX, dirY, dirZ = localDirectionToLocal(wheel.repr, getParent(wheel.repr), 0, -1, 0)
         end
-        setTranslation(wheel.repr, wheel.startPositionX + dirX*suspensionLength, wheel.startPositionY + dirY*suspensionLength, wheel.startPositionZ + dirZ*suspensionLength)
+        setTranslation(wheel.repr, wheel.startPositionX + dirX * suspensionLength, wheel.startPositionY + dirY * suspensionLength, wheel.startPositionZ + dirZ * suspensionLength)
+    end
+end
 
+SetInflationPressureEvent = {}
+SetInflationPressureEvent_mt = Class(SetInflationPressureEvent, Event)
+
+InitEventClass(SetInflationPressureEvent, "SetInflationPressureEvent")
+
+function SetInflationPressureEvent:emptyNew()
+    local event = Event:new(SetInflationPressureEvent_mt)
+    return event
+end
+
+function SetInflationPressureEvent:new(object, pressure)
+    local event = SetInflationPressureEvent:emptyNew()
+
+    event.object = object
+    event.pressure = pressure
+
+    return event
+end
+
+function SetInflationPressureEvent:readStream(streamId, connection)
+    self.object = readNetworkNodeObject(streamId)
+    self.pressure = streamReadInt(streamId)
+
+    self:run(connection)
+end
+
+function SetInflationPressureEvent:writeStream(streamId, connection)
+    writeNetworkNodeObject(streamId, self.object)
+    streamWriteInt(streamId, self.pressure)
+end
+
+function SetInflationPressureEvent:run(connection)
+    self.object:setInflationPressure(self.pressure, true)
+
+    if not connection:getIsServer() then
+        g_server:broadcastEvent(self, false, connection, self.object)
+    end
+end
+
+function SetInflationPressureEvent.sendEvent(object, pressure, noEventSend)
+    if noEventSend == nil or noEventSend == false then
+        if g_server ~= nil then
+            g_server:broadcastEvent(SetInflationPressureEvent:new(object, pressure), nil, nil, object)
+        else
+            g_client:getServerConnection():sendEvent(SetInflationPressureEvent:new(object, pressure))
+        end
     end
 end
