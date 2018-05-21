@@ -30,19 +30,18 @@ function scTirePressure:preLoad()
 end
 
 function scTirePressure:load(savegame)
-    self.scInflationPressure = scTirePressure.PRESSURE_NORMAL
-
     self.updateInflationPressure = scTirePressure.updateInflationPressure
     self.getInflationPressure = scTirePressure.getInflationPressure
     self.setInflationPressure = scTirePressure.setInflationPressure
     self.doCheckSpeedLimit = Utils.overwrittenFunction(self.doCheckSpeedLimit, scTirePressure.doCheckSpeedLimit)
     self.toggleTirePressure = scTirePressure.toggleTirePressure
+
     WheelsUtil.updateWheelGraphics = Utils.appendedFunction(WheelsUtil.updateWheelGraphics, scTirePressure.updatePressureWheelGraphics)
 
-    if savegame ~= nil then
-        if savegame.xmlFile ~= nil then
-            self.scInflationPressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
-        end
+    self.scInflationPressure = scTirePressure.PRESSURE_NORMAL
+
+    if savegame ~= nil and savegame.xmlFile ~= nil then
+        self.scInflationPressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
     end
 
     self.scInCabTirePressureControl = Utils.getNoNil(getXMLBool(self.xmlFile, "vehicle.scInCabTirePressureControl"), false)
@@ -67,16 +66,9 @@ end
 function scTirePressure:keyEvent(...)
 end
 
-function scTirePressure:loadFromAttributesAndNodes(xmlFile, key)
-    return true
-end
-
 function scTirePressure:getSaveAttributesAndNodes(nodeIdent)
-    local attributes = ""
-
-    attributes = attributes .. "scInflationPressure=\"" .. self.scInflationPressure .. "\" "
-
-    return attributes, ""
+    local attributes = ('scInflationPressure="%s"'):format(self.scInflationPressure)
+    return attributes, nil
 end
 
 function scTirePressure:readStream(streamId, connection)
@@ -130,10 +122,6 @@ function scTirePressure:toggleTirePressure()
 end
 
 function scTirePressure:draw()
-    --if self.isEntered then
-    --    renderText(0.44, 0.78, 0.01, "limit = " .. tostring(self.motor.maxForwardSpeed))
-    --end
-
     if self.isClient then
         if self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
             g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"), InputBinding.SOILCOMPACTION_TIRE_INFLATE)
@@ -141,6 +129,10 @@ function scTirePressure:draw()
             g_currentMission:addExtraPrintText(g_i18n:getText("info_TIRE_PRESSURE"):format(self:getInflationPressure()))
         end
     end
+
+    --if self.isEntered then
+    --    renderText(0.44, 0.78, 0.01, "limit = " .. tostring(self.motor.maxForwardSpeed))
+    --end
 end
 
 function scTirePressure:getInflationPressure()
