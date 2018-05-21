@@ -56,9 +56,16 @@ function scTirePressure:load(savegame)
     end
 
     self:updateInflationPressure()
+
+    if g_addCheatCommands then
+        addConsoleCommand("scToggleInCabTirePressureControl", "Toggles incab tire pressure control", "consoleCommandToggleInCapControl", self)
+    end
 end
 
 function scTirePressure:delete()
+    if g_addCheatCommands then
+        removeConsoleCommand("scToggleInCabTirePressureControl")
+    end
 end
 
 function scTirePressure:mouseEvent(...)
@@ -108,9 +115,9 @@ function scTirePressure:update(dt)
 
     if self.isClient and self:getIsActiveForInput(false) and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
         --g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SOILCOMPACTION_TIRE_PRESSURE)
-        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"), InputBinding.SOILCOMPACTION_TIRE_INFLATE))
-        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"), InputBinding.SOILCOMPACTION_TIRE_DEFLATE))
-        g_currentMission:addExtraPrintText(string.format(g_i18n:getText("info_TIRE_PRESSURE"), compressor.foundVehicle:getInflationPressure()))
+        g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"):format(InputBinding.SOILCOMPACTION_TIRE_INFLATE))
+        g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"):format(InputBinding.SOILCOMPACTION_TIRE_DEFLATE))
+        g_currentMission:addExtraPrintText(g_i18n:getText("info_TIRE_PRESSURE"):format(self:getInflationPressure()))
 
         local change = dt * scTirePressure.FLATE_MULTIPLIER
         if InputBinding.hasEvent(InputBinding.SOILCOMPACTION_TIRE_INFLATE) then
@@ -196,6 +203,16 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
         end
         setTranslation(wheel.repr, wheel.startPositionX + dirX * suspensionLength, wheel.startPositionY + dirY * suspensionLength, wheel.startPositionZ + dirZ * suspensionLength)
     end
+end
+
+function scTirePressure:consoleCommandToggleInCapControl()
+    local vehicle = g_currentMission.controlledVehicle
+
+    if vehicle == nil then
+        return "You are not in a vehicle"
+    end
+
+    vehicle.scInCabTirePressureControl = not vehicle.scInCabTirePressureControl
 end
 
 SetInflationPressureEvent = {}
