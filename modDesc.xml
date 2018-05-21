@@ -116,7 +116,8 @@
     </l10n>
 
     <inputBindings>
-        <input name="SOILCOMPACTION_TIRE_PRESSURE"     category="VEHICLE"          key1="KEY_lalt KEY_p" />
+        <input name="SOILCOMPACTION_TIRE_INFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_p" />
+        <input name="SOILCOMPACTION_TIRE_DEFLATE"     category="VEHICLE"          key1="KEY_lctrl KEY_p" />
         <input name="ACTIVATE_HANDTOOL2" key1="KEY_c" key2="" button="BUTTON_4" mouse="MOUSE_BUTTON_RIGHT" device="1" category="ONFOOT" visible="true"/>
     </inputBindings>
     
