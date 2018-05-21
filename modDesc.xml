@@ -35,11 +35,17 @@
             <fr>Cultivation depth (%s)</fr>
             <pl>Głębokość kultywacji (%s)</pl>
         </text>
-        <text name="input_SOILCOMPACTION_TIRE_PRESSURE">
-            <en>Tire inflation pressure (%d kPa)</en>
-            <de>Tire inflation pressure (%d kPa)</de>
-            <fr>Tire inflation pressure (%d kPa)</fr>
-            <pl>Ciśnienie powietrza w oponach (%d kPa)</pl>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE">
+            <en>Inflate pressure</en>
+            <de>Inflate pressure</de>
+            <fr>Inflate pressure</fr>
+            <pl>Inflate pressure</pl>
+        </text>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE">
+            <en>Deflate pressure</en>
+            <de>Deflate pressure</de>
+            <fr>Deflate pressure</fr>
+            <pl>Deflate pressure</pl>
         </text>
         <text name="input_COMPRESSOR_INFLATE">
             <en>Increase tire pressure</en>
@@ -116,8 +122,8 @@
     </l10n>
 
     <inputBindings>
-        <input name="SOILCOMPACTION_TIRE_INFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_p" />
-        <input name="SOILCOMPACTION_TIRE_DEFLATE"     category="VEHICLE"          key1="KEY_lctrl KEY_p" />
+        <input name="SOILCOMPACTION_TIRE_INFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_up" />
+        <input name="SOILCOMPACTION_TIRE_DEFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_down" />
         <input name="ACTIVATE_HANDTOOL2" key1="KEY_c" key2="" button="BUTTON_4" mouse="MOUSE_BUTTON_RIGHT" device="1" category="ONFOOT" visible="true"/>
     </inputBindings>
     

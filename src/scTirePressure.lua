@@ -56,16 +56,9 @@ function scTirePressure:load(savegame)
     end
 
     self:updateInflationPressure()
-
-    if g_addCheatCommands then
-        addConsoleCommand("scToggleInCabTirePressureControl", "Toggles incab tire pressure control", "consoleCommandToggleInCapControl", self)
-    end
 end
 
 function scTirePressure:delete()
-    if g_addCheatCommands then
-        removeConsoleCommand("scToggleInCabTirePressureControl")
-    end
 end
 
 function scTirePressure:mouseEvent(...)
@@ -111,20 +104,23 @@ function scTirePressure:updateInflationPressure()
 end
 
 function scTirePressure:update(dt)
-    -- self.scInCabTirePressureControl = true
+    if not self.isClient then
+        return
+    end
 
-    if self.isClient and self:getIsActiveForInput(false) and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
-        --g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_TIRE_PRESSURE"), self.scInflationPressure), InputBinding.SOILCOMPACTION_TIRE_PRESSURE)
-        g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"):format(InputBinding.SOILCOMPACTION_TIRE_INFLATE))
-        g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"):format(InputBinding.SOILCOMPACTION_TIRE_DEFLATE))
-        g_currentMission:addExtraPrintText(g_i18n:getText("info_TIRE_PRESSURE"):format(self:getInflationPressure()))
+    if self:getIsActiveForInput() and not self:hasInputConflictWithSelection()
+            and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
+        local doInflate = InputBinding.isPressed(InputBinding.SOILCOMPACTION_TIRE_INFLATE)
+        local doDeflate = InputBinding.isPressed(InputBinding.SOILCOMPACTION_TIRE_DEFLATE)
 
-        local change = dt * scTirePressure.FLATE_MULTIPLIER
-        if InputBinding.hasEvent(InputBinding.SOILCOMPACTION_TIRE_INFLATE) then
-            --self:toggleTirePressure()
-            self:setInflationPressure(self:getInflationPressure() + change)
-        elseif InputBinding.hasEvent(InputBinding.SOILCOMPACTION_TIRE_DEFLATE) then
-            self:setInflationPressure(self:getInflationPressure() - change)
+        if doInflate or doDeflate then
+            local pressureChange = dt * scTirePressure.FLATE_MULTIPLIER
+
+            if doDeflate then
+                pressureChange = -pressureChange
+            end
+
+            self:setInflationPressure(self:getInflationPressure() + pressureChange)
         end
     end
 end
@@ -137,6 +133,14 @@ function scTirePressure:draw()
     --if self.isEntered then
     --    renderText(0.44, 0.78, 0.01, "limit = " .. tostring(self.motor.maxForwardSpeed))
     --end
+
+    if self.isClient then
+        if self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
+            g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"), InputBinding.SOILCOMPACTION_TIRE_INFLATE)
+            g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"), InputBinding.SOILCOMPACTION_TIRE_DEFLATE)
+            g_currentMission:addExtraPrintText(g_i18n:getText("info_TIRE_PRESSURE"):format(self:getInflationPressure()))
+        end
+    end
 end
 
 function scTirePressure:getInflationPressure()

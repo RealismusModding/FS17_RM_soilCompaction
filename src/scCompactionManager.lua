@@ -17,15 +17,15 @@ scCompactionManager.modDir = g_currentModDirectory
 
 scCompactionManager.overlayColor = {} -- Additional colors for the compaction overlay (false/true: useColorblindMode)
 scCompactionManager.overlayColor[false] = {
-    {0.6172, 0.0510, 0.0510, 1},
-    {0.6400, 0.1710, 0.1710, 1},
-    {0.6672, 0.3333, 0.3333, 1},
+    { 0.6172, 0.0510, 0.0510, 1 },
+    { 0.6400, 0.1710, 0.1710, 1 },
+    { 0.6672, 0.3333, 0.3333, 1 },
 }
 
 scCompactionManager.overlayColor[true] = {
-    {0.6172, 0.0510, 0.0510, 1},
-    {0.6400, 0.1710, 0.1710, 1},
-    {0.6672, 0.3333, 0.3333, 1},
+    { 0.6172, 0.0510, 0.0510, 1 },
+    { 0.6400, 0.1710, 0.1710, 1 },
+    { 0.6672, 0.3333, 0.3333, 1 },
 }
 
 function scCompactionManager:installVehicleSpecializations()
@@ -54,12 +54,22 @@ end
 
 function scCompactionManager:loadMap()
     self:installVehicleSpecializations()
+
+    if g_addCheatCommands then
+        addConsoleCommand("scToggleInCabTirePressureControl", "Toggles incab tire pressure control", "consoleCommandToggleInCapControl", scTirePressure)
+    end
 end
 
-function scCompactionManager:mouseEvent(posX, posY, isDown, isUp, button)
+function scCompactionManager:deleteMap()
+    if g_addCheatCommands then
+        removeConsoleCommand("scToggleInCabTirePressureControl")
+    end
 end
 
-function scCompactionManager:keyEvent(unicode, sym, modifier, isDown)
+function scCompactionManager:mouseEvent(...)
+end
+
+function scCompactionManager:keyEvent(...)
 end
 
 function scCompactionManager:readStream(streamId, connection)
@@ -74,13 +84,10 @@ end
 function scCompactionManager:draw()
 end
 
-function scCompactionManager:deleteMap()
-end
-
 -- Cutting fruit no longer increases the ploughcounter: only driving over an area does.
 function scCompactionManager.cutFruitArea(superFunc, fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
     --if not scCompactionManager.enabled then
-     --   return superFunc(fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
+    --   return superFunc(fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
     --end
     local tmpNumChannels = g_currentMission.ploughCounterNumChannels
 
@@ -100,11 +107,11 @@ function scCompactionManager.cutFruitArea(superFunc, fruitId, startWorldX, start
 
     -- Special rules for grass
     if fruitId == FruitUtil.FRUITTYPE_GRASS then
-      local sprayRatio = g_currentMission.harvestSprayScaleRatio
-      local ploughRatio = g_currentMission.harvestPloughScaleRatio
+        local sprayRatio = g_currentMission.harvestSprayScaleRatio
+        local ploughRatio = g_currentMission.harvestPloughScaleRatio
 
-      ploughFactor = (1 + ploughFactor * ploughRatio + sprayFactor * sprayRatio) / (1 + ploughRatio + sprayFactor * sprayRatio)
-      volume = volume * ploughFactor
+        ploughFactor = (1 + ploughFactor * ploughRatio + sprayFactor * sprayRatio) / (1 + ploughRatio + sprayFactor * sprayRatio)
+        volume = volume * ploughFactor
     end
 
     return volume, area, sprayFactor, ploughFactor, growthState, growthStateArea
@@ -122,14 +129,12 @@ function scCompactionManager.updateCultivatorArea(superFunc, x, z, x1, z1, x2, z
     setDensityMaskParams(detailId, "greater", g_currentMission.cultivatorValue)
     setDensityCompareParams(detailId, "greater", 0)
 
-    addDensityMaskedParallelogram(
-        detailId,
+    addDensityMaskedParallelogram(detailId,
         x0, z0, widthX, widthZ, heightX, heightZ,
-       compactFirstChannel, compactNumChannels,
-       detailId,
+        compactFirstChannel, compactNumChannels,
+        detailId,
         g_currentMission.terrainDetailTypeFirstChannel, g_currentMission.terrainDetailTypeNumChannels,
-        Utils.getNoNil(delta, scCompactionManager.cultivatorDecompactionDelta)
-    )
+        Utils.getNoNil(delta, scCompactionManager.cultivatorDecompactionDelta))
 
     setDensityMaskParams(detailId, "greater", 0)
     setDensityCompareParams(detailId, "greater", -1)
@@ -150,7 +155,7 @@ function scCompactionManager:inGameMenuGenerateFruitOverlay(superFunc)
             local maxCompaction = bitShiftLeft(1, g_currentMission.ploughCounterNumChannels) - 1
             for level = 1, maxCompaction do
                 local color = colors[math.min(level, #colors)]
-                setFoliageStateOverlayGroundStateColor(self.foliageStateOverlay, g_currentMission.terrainDetailId, bitShiftLeft(bitShiftLeft(1, g_currentMission.terrainDetailTypeNumChannels)-1, g_currentMission.terrainDetailTypeFirstChannel), g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels, level-1, color[1], color[2], color[3])
+                setFoliageStateOverlayGroundStateColor(self.foliageStateOverlay, g_currentMission.terrainDetailId, bitShiftLeft(bitShiftLeft(1, g_currentMission.terrainDetailTypeNumChannels) - 1, g_currentMission.terrainDetailTypeFirstChannel), g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels, level - 1, color[1], color[2], color[3])
             end
 
             -- End draw foliage state overlay
@@ -159,7 +164,7 @@ function scCompactionManager:inGameMenuGenerateFruitOverlay(superFunc)
             self.dynamicMapImageLoading:setVisible(true)
             self:checkFoliageStateOverlayReady()
         end
-    -- Else if ploughing is not selected use vanilla functionality
+        -- Else if ploughing is not selected use vanilla functionality
     else
         superFunc(self)
     end
@@ -198,6 +203,7 @@ function print_r(t)
             end
         end
     end
+
     if (type(t) == "table") then
         print(tostring(t) .. " {")
         sub_print_r(t, "  ")
