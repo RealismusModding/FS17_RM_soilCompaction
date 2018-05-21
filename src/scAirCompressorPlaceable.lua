@@ -37,7 +37,7 @@ function scAirCompressorPlaceable:load(xmlFilename, x, y, z, rx, ry, rz, initRan
     local xmlFile = loadXMLFile("TempXML", xmlFilename)
 
     self.playerInRangeDistance = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.playerInRangeDistance"), 3)
-    self.actionRadius = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.actionRadius#distance"), 15)
+    self.actionRadius = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.actionRadius#distance"), 5)
     self.airDistance = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.airDistance"), 10)
     self.pricePerSecond = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.pricePerSecond"), 10)
     self.inflationMultiplier = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.inflationMultiplier"), 0.005)
