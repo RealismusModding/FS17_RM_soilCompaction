@@ -70,7 +70,7 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     if wheel.tireType == tireTypeCrawler then
         for _, crawler in pairs(self.crawlers) do
             if crawler.baseNode[1].node == wheel.node then
-                length = crawler.scrollLength * 0.5
+                length = crawler.scrollLength * 0.5 - math.pi * radius
             end
         end
         wheel.contactArea = length * width
