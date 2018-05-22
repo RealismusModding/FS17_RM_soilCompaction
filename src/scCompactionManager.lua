@@ -47,6 +47,7 @@ end
 
 function scCompactionManager:load(savegame, key)
     Utils.updateCultivatorArea = Utils.overwrittenFunction(Utils.updateCultivatorArea, scCompactionManager.updateCompactionCultivatorArea)
+    Utils.cutFruitArea = Utils.overwrittenFunction(Utils.cutFruitArea, scCompactionManager.cutFruitArea)
 end
 
 function scCompactionManager:save(savegame, key)
@@ -86,9 +87,6 @@ end
 
 -- Cutting fruit no longer increases the ploughcounter: only driving over an area does.
 function scCompactionManager.cutFruitArea(superFunc, fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
-    --if not scCompactionManager.enabled then
-    --   return superFunc(fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
-    --end
     local tmpNumChannels = g_currentMission.ploughCounterNumChannels
 
     -- Setting to 0 makes the use of it affect nothing
@@ -225,7 +223,5 @@ SpecializationUtil.registerSpecialization("tirePressure", "scTirePressure", scCo
 SpecializationUtil.registerSpecialization("atWorkshop", "scAtWorkshop", scCompactionManager.modDir .. "src/scAtWorkshop.lua")
 
 InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
-Utils.cutFruitArea = Utils.overwrittenFunction(Utils.cutFruitArea, scCompactionManager.cutFruitArea)
-
 
 addModEventListener(scCompactionManager)
