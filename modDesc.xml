@@ -3,21 +3,20 @@
     <author>Realismus Modding</author>
     <contributors>baron, Rahkiin, reallogger, Wopster</contributors>
     <version>0.0.0.1</version>
+
     <title>
         <en>Soil Compaction</en>
         <de>Soil Compaction</de>
         <fr>Soil Compaction</fr>
+        <pl>Zagęszczenie gleby</pl>
     </title>
 
     <description>
         <en><![CDATA[Soil Compaction]]></en>
         <de><![CDATA[Soil Compaction]]></de>
         <fr><![CDATA[Soil Compaction]]></fr>
+        <pl><![CDATA[Zagęszczenie gleby]]></pl>
     </description>
-
-    <credits><![CDATA[
-## Translations
-]]></credits>
 
     <iconFilename>icon.png</iconFilename>
 
@@ -28,99 +27,6 @@
         <sourceFile filename="src/scAirCompressorPlaceable.lua"/>
     </extraSourceFiles>
 
-    <l10n>
-        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH">
-            <en>Cultivation depth (%s)</en>
-            <de>Cultivation depth (%s)</de>
-            <fr>Cultivation depth (%s)</fr>
-            <pl>Głębokość kultywacji (%s)</pl>
-        </text>
-        <text name="input_SOILCOMPACTION_TIRE_INFLATE">
-            <en>Inflate pressure</en>
-            <de>Inflate pressure</de>
-            <fr>Inflate pressure</fr>
-            <pl>Inflate pressure</pl>
-        </text>
-        <text name="input_SOILCOMPACTION_TIRE_DEFLATE">
-            <en>Deflate pressure</en>
-            <de>Deflate pressure</de>
-            <fr>Deflate pressure</fr>
-            <pl>Deflate pressure</pl>
-        </text>
-        <text name="input_COMPRESSOR_INFLATE">
-            <en>Increase tire pressure</en>
-            <de>Increase tire pressure</de>
-            <fr>Increase tire pressure</fr>
-            <pl>Zwiększ ciśnienie w oponach</pl>
-        </text>
-        <text name="input_COMPRESSOR_DEFLATE">
-            <en>Decrease tire pressure</en>
-            <de>Decrease tire pressure</de>
-            <fr>Decrease tire pressure</fr>
-            <pl>Zmniejsz ciśnienie w oponach</pl>
-        </text>
-        <text name="info_TIRE_PRESSURE">
-            <en>Tire pressure: %d kPa</en>
-            <de>Tire pressure: %d kPa</de>
-            <fr>Tire pressure: %d kPa</fr>
-            <pl>Ciśnienie w oponach: %d kPa</pl>
-        </text>
-        <text name="warning_compressorRangeRestriction">
-            <en>The compressor hose restricts you from going any further</en>
-            <de>The compressor hose restricts you from going any further </de>
-            <fr>The compressor hose restricts you from going any further</fr>
-            <pl>Rozciągnąłeś maksymalnie wąż od sprężarki, dalej nie pójdziesz!</pl>
-         </text>
-        <text name="typeDesc_airCompressor">
-            <en>air compressor</en>
-            <de>air compressor</de>
-            <fr>air compressor</fr>
-            <pl>kompresor powietrza</pl>
-        </text>
-        <text name="warning_tireload">
-            <en>Tire load is too high. Increase tire pressure on the %s!</en>
-            <de>Tire load is too high. Increase tire pressure on the %s!</de>
-            <fr>Tire load is too high. Increase tire pressure on the %s!</fr>
-            <pl>Obciążenie opony jest zbyt wysokie. Zwiększ ciśnienie w oponach na %s!</pl>
-        </text>
-        <text name="CULTIVATION_DEPTH_1">
-            <en>Shallow</en>
-            <de>Shallow</de>
-            <fr>Shallow</fr>
-            <pl>Płytko</pl>
-        </text>
-        <text name="CULTIVATION_DEPTH_2">
-            <en>Deep</en>
-            <de>Deep</de>
-            <fr>Deep</fr>
-            <pl>Głęboko</pl>
-         </text>
-        <text name="COMPACTION_0">
-            <en>%s causes heavy compaction</en>
-            <de>%s causes heavy compaction</de>
-            <fr>%s causes heavy compaction</fr>
-            <pl>%s powoduje mocne ugniatanie</pl>
-         </text>
-        <text name="COMPACTION_1">
-            <en>%s causes medium compaction</en>
-            <de>%s causes medium compaction</de>
-            <fr>%s causes medium compaction</fr>
-            <pl>%s powoduje średnie ugniatanie</pl>
-         </text>
-        <text name="COMPACTION_2">
-            <en>%s causes light compaction</en>
-            <de>%s causes light compaction</de>
-            <fr>%s causes light compaction</fr>
-            <pl>%s powoduje słabe ugniatanie</pl>
-         </text>
-        <text name="COMPACTION_3">
-            <en>%s causes no compaction</en>
-            <de>%s causes no compaction</de>
-            <fr>%s causes no compaction</fr>
-            <pl>%s nie powoduje ugniatania</pl>
-         </text>
-    </l10n>
-
     <inputBindings>
         <input name="SOILCOMPACTION_TIRE_INFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_up" />
         <input name="SOILCOMPACTION_TIRE_DEFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_down" />
@@ -130,5 +36,7 @@
     <storeItems>
         <storeItem rootNode="placeable" xmlFilename="resources/compressor.xml" />
     </storeItems>
+
+    <l10n filenamePrefix="translations/translation"/>
 </modDesc>
 
