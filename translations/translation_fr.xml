@@ -15,6 +15,7 @@
         <text name="warning_tireload" text="Tire load is too high. Increase tire pressure on the %s!"/>
         <!-- General -->
         <text name="typeDesc_airCompressor" text="air compressor"/>
+        <text name="function_airCompressor" text="With an air compressor you can inflate tire pressure of your machinery."/>
 
         <text name="CULTIVATION_DEPTH_1" text="Shallow"/>
         <text name="CULTIVATION_DEPTH_2" text="Deep"/>
