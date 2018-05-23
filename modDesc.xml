@@ -41,13 +41,13 @@
             <en>Inflate pressure</en>
             <de>Inflate pressure</de>
             <fr>Inflate pressure</fr>
-            <pl>Inflate pressure</pl>
+            <pl>Zwiększ ciśnienie</pl>
         </text>
         <text name="input_SOILCOMPACTION_TIRE_DEFLATE">
             <en>Deflate pressure</en>
             <de>Deflate pressure</de>
             <fr>Deflate pressure</fr>
-            <pl>Deflate pressure</pl>
+            <pl>Zmniejsz ciśnienie</pl>
         </text>
         <text name="input_COMPRESSOR_INFLATE">
             <en>Increase tire pressure</en>
@@ -101,25 +101,25 @@
             <en>%s causes heavy compaction</en>
             <de>%s causes heavy compaction</de>
             <fr>%s causes heavy compaction</fr>
-            <pl>%s powoduje mocne ugniatanie</pl>
+            <pl>%s mocno ugniata glebę</pl>
          </text>
         <text name="COMPACTION_1">
             <en>%s causes medium compaction</en>
             <de>%s causes medium compaction</de>
             <fr>%s causes medium compaction</fr>
-            <pl>%s powoduje średnie ugniatanie</pl>
+            <pl>%s średnio ugniata glebę</pl>
          </text>
         <text name="COMPACTION_2">
             <en>%s causes light compaction</en>
             <de>%s causes light compaction</de>
             <fr>%s causes light compaction</fr>
-            <pl>%s powoduje słabe ugniatanie</pl>
+            <pl>%s słabo ugniata glebę</pl>
          </text>
         <text name="COMPACTION_3">
             <en>%s causes no compaction</en>
             <de>%s causes no compaction</de>
             <fr>%s causes no compaction</fr>
-            <pl>%s nie powoduje ugniatania</pl>
+            <pl>%s nie ugniata gleby</pl>
          </text>
     </l10n>
 
