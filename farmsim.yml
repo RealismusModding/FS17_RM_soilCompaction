@@ -16,6 +16,13 @@ code: src/
 resources:
   - resources/
 
+base_translation: en
+translations:
+  - de
+  - en
+  - fr
+  - pl
+
 templates:
   debug: true
   verbose: true
