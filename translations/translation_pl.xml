@@ -3,19 +3,18 @@
     <texts>
         <!-- Inputs -->
         <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Głębokość kultywacji (%s)"/>
-        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Inflate pressure"/>
-        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Deflate pressure"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Zwiększ ciśnienie"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Zmniejsz ciśnienie"/>
         <text name="input_COMPRESSOR_INFLATE" text="Zwiększ ciśnienie w oponach"/>
         <text name="input_COMPRESSOR_DEFLATE" text="Zmniejsz ciśnienie w oponach"/>
         <!-- Info -->
         <text name="info_TIRE_PRESSURE" text="Ciśnienie w oponach: %d kPa"/>
         <!-- Warnings -->
-        <text name="warning_compressorRangeRestriction"
-              text="Rozciągnąłeś maksymalnie wąż od sprężarki, dalej nie pójdziesz!"/>
+        <text name="warning_compressorRangeRestriction" text="Rozciągnąłeś maksymalnie wąż od sprężarki, dalej nie pójdziesz!"/>
         <text name="warning_tireload" text="Obciążenie opony jest zbyt wysokie. Zwiększ ciśnienie w oponach na %s!"/>
         <!-- General -->
         <text name="typeDesc_airCompressor" text="kompresor powietrza"/>
-        <text name="function_airCompressor" text="With an air compressor you can inflate tire pressure of your machinery."/><!-- Missing translation -->
+        <text name="function_airCompressor" text="Za pomocą kompresora powietrza możesz zmieniać ciśnienie w oponach w swoich pojazdach i maszynach."/>
 
         <text name="CULTIVATION_DEPTH_1" text="Płytko"/>
         <text name="CULTIVATION_DEPTH_2" text="Głęboko"/>
