@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/RealismusModding/FS17_RM_soilCompaction.svg?branch=master)](https://travis-ci.org/RealismusModding/FS17_RM_soilCompaction)
+
 # FS17_RM_soilCompaction
 
 This mod simulates soil compaction. Vehicles will compact the soil to varying degree depending on ground pressure, soil wetness etc. The soil can be decompacted with ploughing, rippers, cultivators etc.
