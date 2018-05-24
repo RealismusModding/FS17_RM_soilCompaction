@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <!-- Inputs -->
+        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Cultivation depth (%s)"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Inflate pressure"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Deflate pressure"/>
+        <text name="input_COMPRESSOR_INFLATE" text="Increase tire pressure"/>
+        <text name="input_COMPRESSOR_DEFLATE" text="Decrease tire pressure"/>
+        <!-- Info -->
+        <text name="info_TIRE_PRESSURE" text="Tire pressure: %d kPa"/>
+        <!-- Warnings -->
+        <text name="warning_compressorRangeRestriction"
+              text="The compressor hose restricts you from going any further"/>
+        <text name="warning_tireload" text="Tire load is too high. Increase tire pressure on the %s!"/>
+        <!-- General -->
+        <text name="typeDesc_airCompressor" text="air compressor"/>
+        <text name="function_airCompressor" text="With an air compressor you can inflate tire pressure of your machinery."/>
+
+        <text name="CULTIVATION_DEPTH_1" text="Shallow"/>
+        <text name="CULTIVATION_DEPTH_2" text="Deep"/>
+
+        <text name="COMPACTION_0" text="%s causes heavy compaction"/>
+        <text name="COMPACTION_1" text="%s causes medium compaction"/>
+        <text name="COMPACTION_2" text="%s causes light compaction"/>
+        <text name="COMPACTION_3" text="%s causes no compaction"/>
+    </texts>
+</l10n>

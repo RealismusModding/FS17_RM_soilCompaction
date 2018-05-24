@@ -1,10 +1,8 @@
 name: SoilCompaction
 author: Realismus Modding
 contributors:
-  - theSeb
   - Rahkiin
   - reallogger
-  - mrbear
   - baron
   - Wopster
 zip_name: FS17_RM_SoilCompaction
@@ -15,6 +13,13 @@ code: src/
 
 resources:
   - resources/
+
+base_translation: en
+translations:
+  - de
+  - en
+  - fr
+  - pl
 
 templates:
   debug: true

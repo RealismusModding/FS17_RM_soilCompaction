@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <!-- Inputs -->
+        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Głębokość kultywacji (%s)"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Inflate pressure"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Deflate pressure"/>
+        <text name="input_COMPRESSOR_INFLATE" text="Zwiększ ciśnienie w oponach"/>
+        <text name="input_COMPRESSOR_DEFLATE" text="Zmniejsz ciśnienie w oponach"/>
+        <!-- Info -->
+        <text name="info_TIRE_PRESSURE" text="Ciśnienie w oponach: %d kPa"/>
+        <!-- Warnings -->
+        <text name="warning_compressorRangeRestriction"
+              text="Rozciągnąłeś maksymalnie wąż od sprężarki, dalej nie pójdziesz!"/>
+        <text name="warning_tireload" text="Obciążenie opony jest zbyt wysokie. Zwiększ ciśnienie w oponach na %s!"/>
+        <!-- General -->
+        <text name="typeDesc_airCompressor" text="kompresor powietrza"/>
+        <text name="function_airCompressor" text="With an air compressor you can inflate tire pressure of your machinery."/><!-- Missing translation -->
+
+        <text name="CULTIVATION_DEPTH_1" text="Płytko"/>
+        <text name="CULTIVATION_DEPTH_2" text="Głęboko"/>
+
+        <text name="COMPACTION_0" text="%s mocno ugniata glebę"/>
+        <text name="COMPACTION_1" text="%s średnio ugniata glebę"/>
+        <text name="COMPACTION_2" text="%s słabo ugniata glebę"/>
+        <text name="COMPACTION_3" text="%s nie ugniata gleby"/>
+    </texts>
+</l10n>
