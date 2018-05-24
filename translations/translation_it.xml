@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <!-- Inputs -->
+        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Profondità di coltivazione (%s)"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Aumenta pressione"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Diminuisci pressione"/>
+        <text name="input_COMPRESSOR_INFLATE" text="Aumenta la pressione degli pneumatici"/>
+        <text name="input_COMPRESSOR_DEFLATE" text="Diminuisci la pressione degli pneumatici"/>
+        <!-- Info -->
+        <text name="info_TIRE_PRESSURE" text="Pressione pneumatici: %d kPa"/>
+        <!-- Warnings -->
+        <text name="warning_compressorRangeRestriction" text="Il tubo del compressore non ti permette di allontanarti oltre"/>
+        <text name="warning_tireload" text="Il carico sugli pneumatici è troppo alto. Aumentare la pressione degli pneumatici sul %s!"/>
+        <!-- General -->
+        <text name="typeDesc_airCompressor" text="Compressore d'aria"/>
+        <text name="function_airCompressor" text="Con un compressore puoi aumentare la pressione degli pneumatici."/>
+
+        <text name="CULTIVATION_DEPTH_1" text="Superficiale"/>
+        <text name="CULTIVATION_DEPTH_2" text="Profondo"/>
+
+        <text name="COMPACTION_0" text="%s causa compattamento pesante"/>
+        <text name="COMPACTION_1" text="%s causa compattamento medio"/>
+        <text name="COMPACTION_2" text="%s causa compattamento leggero"/>
+        <text name="COMPACTION_3" text="%s non causa compattamento"/>
+    </texts>
+</l10n>
