@@ -6,16 +6,18 @@
 
     <title>
         <en>Soil Compaction</en>
-        <de>Soil Compaction</de>
+        <de>Bodenverdichtung</de>
         <fr>Soil Compaction</fr>
         <pl>Zagęszczenie gleby</pl>
+        <nl>Bodemverdichting</nl>
     </title>
 
     <description>
         <en><![CDATA[Soil Compaction]]></en>
-        <de><![CDATA[Soil Compaction]]></de>
+        <de><![CDATA[Bodenverdichtung]]></de>
         <fr><![CDATA[Soil Compaction]]></fr>
         <pl><![CDATA[Zagęszczenie gleby]]></pl>
+        <nl><![CDATA[Bodemverdichting]]></nl>
     </description>
 
     <iconFilename>icon.png</iconFilename>
@@ -23,18 +25,18 @@
     <multiplayer supported="true"/>
 
     <extraSourceFiles>
-        <sourceFile filename="src/scCompactionManager.lua" />
+        <sourceFile filename="src/scCompactionManager.lua"/>
         <sourceFile filename="src/scAirCompressorPlaceable.lua"/>
     </extraSourceFiles>
 
     <inputBindings>
-        <input name="SOILCOMPACTION_TIRE_INFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_up" />
-        <input name="SOILCOMPACTION_TIRE_DEFLATE"     category="VEHICLE"          key1="KEY_lalt KEY_down" />
+        <input name="SOILCOMPACTION_TIRE_INFLATE" category="VEHICLE" key1="KEY_lalt KEY_up"/>
+        <input name="SOILCOMPACTION_TIRE_DEFLATE" category="VEHICLE" key1="KEY_lalt KEY_down"/>
         <input name="ACTIVATE_HANDTOOL2" key1="KEY_c" key2="" button="BUTTON_4" mouse="MOUSE_BUTTON_RIGHT" device="1" category="ONFOOT" visible="true"/>
     </inputBindings>
-    
+
     <storeItems>
-        <storeItem rootNode="placeable" xmlFilename="resources/compressor.xml" />
+        <storeItem rootNode="placeable" xmlFilename="resources/compressor.xml"/>
     </storeItems>
 
     <l10n filenamePrefix="translations/translation"/>

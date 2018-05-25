@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <!-- Inputs -->
+        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Cultivator diepte (%s)"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Luchtdruk verhogen"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Luchtdruk verlagen"/>
+        <text name="input_COMPRESSOR_INFLATE" text="Bandenspanning verhogen"/>
+        <text name="input_COMPRESSOR_DEFLATE" text="Bandenspanning verlagen"/>
+        <!-- Info -->
+        <text name="info_TIRE_PRESSURE" text="Luchtdruk: %d kPa"/>
+        <!-- Warnings -->
+        <text name="warning_compressorRangeRestriction"
+              text="De compressor slang is te kort, om verder te kunnen lopen."/>
+        <text name="warning_tireload" text="De last op de banden is te hoog. Verhoog de bandenspanning voor %s!"/>
+        <!-- General -->
+        <text name="typeDesc_airCompressor" text="luchtcompressor"/>
+        <text name="function_airCompressor" text="Met een luchtcompressor kun je de bandenspanning voorhogen van je machines."/>
+
+        <text name="CULTIVATION_DEPTH_1" text="Ondiep"/>
+        <text name="CULTIVATION_DEPTH_2" text="Diep"/>
+
+        <text name="COMPACTION_0" text="%s veroorzaakt zware verdichting"/>
+        <text name="COMPACTION_1" text="%s veroorzaakt gemiddelde verdichting"/>
+        <text name="COMPACTION_2" text="%s veroorzaakt lichte verdichting"/>
+        <text name="COMPACTION_3" text="%s veroorzaakt geen verdichting"/>
+    </texts>
+</l10n>
