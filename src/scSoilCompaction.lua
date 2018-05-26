@@ -12,6 +12,27 @@ scSoilCompaction.LIGHT_COMPACTION = -0.15
 scSoilCompaction.MEDIUM_COMPACTION = 0.05
 scSoilCompaction.HEAVY_COMPACTION = 0.2
 
+-- Stijn: we have to make an assumption here.. no way to do this clean anyway with the current setup from Giants.
+-- If rotationParts are lower than 5 we are dealing with a parallel track
+scSoilCompaction.TRACK_PARALLEL = "parallel"
+scSoilCompaction.TRACK_TRIANGULAR = "triangular"
+
+local _trackTypesLenghtFactors = {
+    [scSoilCompaction.TRACK_PARALLEL] = 0.3,
+    [scSoilCompaction.TRACK_TRIANGULAR] = 0.5
+}
+
+---
+-- @param numOfRationParts
+--
+local function mapNumOfRotationPartsToTrackType(numOfRationParts)
+    if numOfRationParts < 5 then
+        return scSoilCompaction.TRACK_PARALLEL
+    end
+
+    return scSoilCompaction.TRACK_TRIANGULAR
+end
+
 function scSoilCompaction:prerequisitesPresent(specializations)
     return true
 end
@@ -26,6 +47,14 @@ function scSoilCompaction:load(savegame)
     self.getTireMaxLoad = scSoilCompaction.getTireMaxLoad
 end
 
+function scSoilCompaction:postLoad(savegame)
+    if self.crawlers ~= nil then
+        for _, crawler in pairs(self.crawlers) do
+            crawler.trackType = mapNumOfRotationPartsToTrackType(#crawler.rotatingParts)
+        end
+    end
+end
+
 function scSoilCompaction:delete()
 end
 
@@ -33,6 +62,10 @@ function scSoilCompaction:mouseEvent(posX, posY, isDown, isUp, button)
 end
 
 function scSoilCompaction:keyEvent(unicode, sym, modifier, isDown)
+end
+
+local function getTrackTypeContactAreaLength(crawler, radius)
+    return crawler.scrollLength * _trackTypesLenghtFactors[crawler.trackType] - math.pi * radius
 end
 
 function scSoilCompaction:calculateSoilCompaction(wheel)
@@ -67,28 +100,12 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     wheel.contactArea = 0.38 * wheel.load ^ 0.7 * math.sqrt(width / (radius * 2)) / inflationPressure ^ 0.45
 
     local tireTypeCrawler = WheelsUtil.getTireType("crawler")
+
     if wheel.tireType == tireTypeCrawler then
         for _, crawler in pairs(self.crawlers) do
-
-            local baseNodeId = crawler.baseNode
-            local trackType = "parallel"
-            if type(baseNodeId) == "table" then
-                --assumes parallel track
-                baseNodeId = crawler.baseNode[1].node
-            else
-                --assumes triangular track
-                trackType = "triangular"
-                baseNodeId = crawler.speedRefWheel.node
-            end
-
-            if baseNodeId == wheel.node then
-                if trackType == "parallel" then
-                    length = crawler.scrollLength * 0.5 - math.pi * radius
-                else
-                    length = crawler.scrollLength * 0.3 - math.pi * radius
-                end
-            end
+            length = getTrackTypeContactAreaLength(crawler, radius, wheel.node)
         end
+
         wheel.contactArea = length * width
     end
 
