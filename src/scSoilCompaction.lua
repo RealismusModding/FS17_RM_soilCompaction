@@ -12,6 +12,8 @@ scSoilCompaction.LIGHT_COMPACTION = -0.15
 scSoilCompaction.MEDIUM_COMPACTION = 0.05
 scSoilCompaction.HEAVY_COMPACTION = 0.2
 
+scSoilCompaction.WORST_COMPACTION_LEVEL = 4
+
 -- Stijn: we have to make an assumption here.. no way to do this clean anyway with the current setup from Giants.
 -- If rotationParts are lower than 5 we are dealing with a parallel track
 scSoilCompaction.TRACK_PARALLEL = "parallel"
@@ -38,13 +40,14 @@ function scSoilCompaction:prerequisitesPresent(specializations)
 end
 
 function scSoilCompaction:preLoad(savegame)
-end
-
-function scSoilCompaction:load(savegame)
     self.applySoilCompaction = scSoilCompaction.applySoilCompaction
     self.calculateSoilCompaction = scSoilCompaction.calculateSoilCompaction
     self.getCompactionLayers = scSoilCompaction.getCompactionLayers
     self.getTireMaxLoad = scSoilCompaction.getTireMaxLoad
+end
+
+function scSoilCompaction:load(savegame)
+    self.isAllowedToCompactSoil = not SpecializationUtil.hasSpecialization(Cultivator, self.specializations)
 end
 
 function scSoilCompaction:postLoad(savegame)
@@ -58,10 +61,10 @@ end
 function scSoilCompaction:delete()
 end
 
-function scSoilCompaction:mouseEvent(posX, posY, isDown, isUp, button)
+function scSoilCompaction:mouseEvent(...)
 end
 
-function scSoilCompaction:keyEvent(unicode, sym, modifier, isDown)
+function scSoilCompaction:keyEvent(...)
 end
 
 local function getTrackTypeContactAreaLength(crawler, radius)
@@ -102,8 +105,25 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     local tireTypeCrawler = WheelsUtil.getTireType("crawler")
 
     if wheel.tireType == tireTypeCrawler then
-        for _, crawler in pairs(self.crawlers) do
-            length = getTrackTypeContactAreaLength(crawler, radius, wheel.node)
+        local numOfCrawlers = #self.crawlers
+
+        for crawlerIndex = 0, numOfCrawlers - 1 do
+            local crawler = self.crawlers[crawlerIndex + 1]
+            local foundMatch = crawler.speedRefWheel ~= nil and crawler.speedRefWheel.node == wheel.node
+
+            if not foundMatch and wheel.hasTireTracks then
+                local wheelIndex = wheel.xmlIndex
+                if wheelIndex >= numOfCrawlers then
+                    wheelIndex = math.min(crawlerIndex, wheel.xmlIndex)
+                end
+
+                foundMatch = crawlerIndex == wheelIndex
+            end
+
+            if foundMatch then
+                length = getTrackTypeContactAreaLength(crawler, radius)
+                break
+            end
         end
 
         wheel.contactArea = length * width
@@ -253,33 +273,38 @@ function scSoilCompaction:getCompactionLayers(wheel, width, length, radius, delt
 end
 
 function scSoilCompaction:update(dt)
+    if g_currentMission:getIsServer()
+            and self.lastSpeedReal ~= 0
+            and self.isAllowedToCompactSoil then
 
-    if self.lastSpeedReal ~= 0
-            and g_currentMission:getIsServer()
-            and not SpecializationUtil.hasSpecialization(Cultivator, self.specializations) then
-
+        local applySoilCompaction = true
         if g_seasons ~= nil then
-            if not g_seasons.weather:isGroundFrozen() then
-                self:applySoilCompaction()
-            end
-        else
+            applySoilCompaction = g_seasons.weather:isGroundFrozen()
+        end
+
+        if applySoilCompaction then
             self:applySoilCompaction()
         end
     end
 
-    if self:isPlayerInRange() then
-        local worstCompaction = 4
+    if g_currentMission:getIsClient()
+            and self.wheels ~= nil
+            and self:isPlayerInRange() then
+        local worstCompaction = scSoilCompaction.WORST_COMPACTION_LEVEL
+
         for _, wheel in pairs(self.wheels) do
             -- fallback to 'no compaction'
             if wheel.possibleCompaction == nil and wheel.load == nil then
                 self:calculateSoilCompaction(wheel)
             end
-            worstCompaction = math.min(worstCompaction, Utils.getNoNil(wheel.possibleCompaction, 4))
+
+            worstCompaction = math.min(worstCompaction, Utils.getNoNil(wheel.possibleCompaction, scSoilCompaction.WORST_COMPACTION_LEVEL))
         end
 
-        if worstCompaction < 4 then
+        if worstCompaction < scSoilCompaction.WORST_COMPACTION_LEVEL then
             local storeItem = StoreItemsUtil.storeItemsByXMLFilename[self.configFileName:lower()]
-            local compactionText = string.format(g_i18n:getText("COMPACTION_" .. tostring(worstCompaction)), storeItem.name)
+            local compactionText = g_i18n:getText(("COMPACTION_%d"):format(worstCompaction)):format(storeItem.name)
+
             g_currentMission:addExtraPrintText(compactionText)
         end
     end
