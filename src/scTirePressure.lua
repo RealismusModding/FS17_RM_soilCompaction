@@ -15,7 +15,7 @@ scTirePressure.PRESSURE_LOW = 80
 scTirePressure.PRESSURE_NORMAL = 180
 scTirePressure.PRESSURE_MAX = 180
 
-scTirePressure.INCREASE = 0.25
+scTirePressure.INCREASE = 1.15
 scTirePressure.FLATE_MULTIPLIER = 0.01
 
 local PARAM_MORPH = "morphPosition"
@@ -52,6 +52,9 @@ function scTirePressure:load(savegame)
         if wheel.tireType ~= tireTypeCrawler then
             self.scAllWheelsCrawlers = false
         end
+
+        wheel.scOrgDeltaY = wheel.deltaY
+        wheel.scOrgRadius = wheel.radius
     end
 
     self:updateInflationPressure()
@@ -96,12 +99,11 @@ function scTirePressure:updateInflationPressure()
 end
 
 function scTirePressure:update(dt)
-    if not self.isClient then
-        return
-    end
-
-    if self:getIsActiveForInput() and not self:hasInputConflictWithSelection()
-            and self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
+    if self.isClient
+            and self:getIsActiveForInput()
+            and not self:hasInputConflictWithSelection()
+            and self.scInCabTirePressureControl
+            and not self.scAllWheelsCrawlers then
         local doInflate = InputBinding.isPressed(InputBinding.SOILCOMPACTION_TIRE_INFLATE)
         local doDeflate = InputBinding.isPressed(InputBinding.SOILCOMPACTION_TIRE_DEFLATE)
 
@@ -174,8 +176,8 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
 
             if wheel.tireType ~= tireTypeCrawler then
                 local x, y, z, _ = getShaderParameter(wheel.wheelTire, PARAM_MORPH)
-                local deformation = Utils.clamp((wheel.deltaY + 0.04 - suspensionLength) * (scTirePressure.INCREASE + (self.scInflationPressure - 80) / 100), 0, wheel.maxDeformation)
-                deformation = wheel.maxDeformation
+                local deformation = Utils.clamp((wheel.deltaY + 0.04 - suspensionLength) * (scTirePressure.INCREASE - (self.scInflationPressure - 80) / 100), 0, wheel.maxDeformation)
+
                 -- Redo the shader morph for better graphical display.. could have just clamped the maxDeformation value but that doesn't really give the correct visual feeling.
                 setShaderParameter(wheel.wheelTire, PARAM_MORPH, x, y, z, deformation, false)
 
@@ -192,11 +194,19 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
 
         suspensionLength = suspensionLength - wheel.deltaY
 
+        wheel.deltaY = wheel.scOrgDeltaY + suspensionLength
+        wheel.radius = wheel.scOrgRadius - suspensionLength
+
+        if self.isServer then
+            self:updateWheelBase(wheel)
+        end
+
         local dirX, dirY, dirZ = 0, -1, 0
 
         if wheel.repr ~= wheel.driveNode then
             dirX, dirY, dirZ = localDirectionToLocal(wheel.repr, getParent(wheel.repr), 0, -1, 0)
         end
+
         setTranslation(wheel.repr, wheel.startPositionX + dirX * suspensionLength, wheel.startPositionY + dirY * suspensionLength, wheel.startPositionZ + dirZ * suspensionLength)
     end
 end
