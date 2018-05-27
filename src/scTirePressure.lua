@@ -39,7 +39,6 @@ function scTirePressure:load(savegame)
     WheelsUtil.updateWheelGraphics = Utils.appendedFunction(WheelsUtil.updateWheelGraphics, scTirePressure.updatePressureWheelGraphics)
 
     self.scInflationPressure = scTirePressure.PRESSURE_NORMAL
-    self.scInflactionIsActive = false
 
     if savegame ~= nil and savegame.xmlFile ~= nil then
         self.scInflationPressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
@@ -59,10 +58,21 @@ function scTirePressure:load(savegame)
         wheel.scOrgRadius = wheel.radius
     end
 
+    self.scInflactionDirtyFlag = self:getNextDirtyFlag()
+
+    if self.isClient then
+        local sampleNode = Utils.indexToObject(self.components, Utils.getNoNil(getXMLString(self.xmlFile, "vehicle.tirePressure.airSound#linkNode"), "0>"))
+
+        self.sampleAirSound = SoundUtil.loadSample(self.xmlFile, {}, "vehicle.tirePressure.airSound", "$data/maps/sounds/siloFillSound.wav", self.baseDirectory, sampleNode)
+    end
+
     self:updateInflationPressure()
 end
 
 function scTirePressure:delete()
+    if self.isClient then
+        SoundUtil.deleteSample(self.sampleAirSound)
+    end
 end
 
 function scTirePressure:mouseEvent(...)
@@ -78,12 +88,30 @@ end
 
 function scTirePressure:readStream(streamId, connection)
     self.scInflationPressure = streamReadInt(streamId)
-    self.scInflactionIsActive = streamReadBool(streamId)
+    self.scDoDeflate = streamReadBool(streamId)
+    self.scDoInflate = streamReadBool(streamId)
 end
 
 function scTirePressure:writeStream(streamId, connection)
     streamWriteInt(streamId, self.scInflationPressure)
-    streamWriteBool(streamId, self.scInflactionIsActive)
+    streamWriteBool(streamId, self.scDoDeflate)
+    streamWriteBool(streamId, self.scDoInflate)
+end
+
+function scTirePressure:readUpdateStream(streamId, timestamp, connection)
+    if streamReadBool(streamId) then
+        self.scDoDeflate = streamReadBool(streamId)
+        self.scDoInflate = streamReadBool(streamId)
+    end
+end
+
+function scTirePressure:writeUpdateStream(streamId, connection, dirtyMask)
+    local allowConnection = connection:getIsServer() or connection ~= self:getOwner()
+
+    if streamWriteBool(streamId, allowConnection and bitAND(dirtyMask, self.scInflactionDirtyFlag) ~= 0) then
+        streamWriteBool(streamId, self.scDoDeflate)
+        streamWriteBool(streamId, self.scDoInflate)
+    end
 end
 
 function scTirePressure:updateInflationPressure()
@@ -103,7 +131,8 @@ function scTirePressure:updateInflationPressure()
 end
 
 function scTirePressure:update(dt)
-    if self:getIsActiveForInput()
+    if self.isClient
+            and self:getIsActiveForInput()
             and not self:hasInputConflictWithSelection()
             and self.scInCabTirePressureControl
             and not self.scAllWheelsCrawlers then
@@ -118,13 +147,32 @@ function scTirePressure:update(dt)
             end
 
             self:setInflationPressure(self:getInflationPressure() + pressureChange)
-        else
-            self.scInflactionIsActive = false -- Todo: fix server side code
+        end
+
+        if doDeflate ~= self.scDoDeflate or doInflate ~= self.scDoInflate then
+            self.scDoDeflate = doDeflate
+            self.scDoInflate = doInflate
+            self:raiseDirtyFlags(self.scInflactionDirtyFlag)
         end
     end
 end
 
 function scTirePressure:updateTick(dt)
+    if self.isClient then
+        local pressure = self:getInflationPressure()
+        local isCapped = pressure == scTirePressure.PRESSURE_MIN or pressure == scTirePressure.PRESSURE_MAX
+
+        if (self.scDoInflate or self.scDoDeflate) and not isCapped then
+            local maxPitch = self.scDoDeflate and 1.7 or 1.2
+            local minPitch = self.scDoDeflate and 1.5 or 1
+            local pitch = Utils.lerp(minPitch, maxPitch, 1)
+
+            SoundUtil.setSamplePitch(self.sampleAirSound, pitch)
+            SoundUtil.play3DSample(self.sampleAirSound)
+        else
+            SoundUtil.stop3DSample(self.sampleAirSound)
+        end
+    end
 end
 
 function scTirePressure:toggleTirePressure()
@@ -157,7 +205,6 @@ function scTirePressure:setInflationPressure(pressure, noEventSend)
     self.scInflationPressure = Utils.clamp(pressure, scTirePressure.PRESSURE_MIN, scTirePressure.PRESSURE_MAX)
 
     if self.scInflationPressure ~= old then
-        self.scInflactionIsActive = true
         self:updateInflationPressure()
     end
 end
@@ -203,7 +250,9 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
 
         suspensionLength = suspensionLength - wheel.deltaY
 
-        if self.scInflactionIsActive and math.abs(wheel.scPhysicsSuspensionLenght - suspensionLength) > 0.01 then
+        local isInflating = self.scDoDeflate or self.scDoInflate
+
+        if isInflating and math.abs(wheel.scPhysicsSuspensionLenght - suspensionLength) > 0.01 then
             wheel.scPhysicsSuspensionLenght = suspensionLength
             wheel.deltaY = wheel.scOrgDeltaY + suspensionLength
 
