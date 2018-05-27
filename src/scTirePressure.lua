@@ -39,6 +39,7 @@ function scTirePressure:load(savegame)
     WheelsUtil.updateWheelGraphics = Utils.appendedFunction(WheelsUtil.updateWheelGraphics, scTirePressure.updatePressureWheelGraphics)
 
     self.scInflationPressure = scTirePressure.PRESSURE_NORMAL
+    self.scInflactionIsActive = false
 
     if savegame ~= nil and savegame.xmlFile ~= nil then
         self.scInflationPressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
@@ -53,6 +54,7 @@ function scTirePressure:load(savegame)
             self.scAllWheelsCrawlers = false
         end
 
+        wheel.scPhysicsSuspensionLenght = wheel.netInfo.suspensionLength
         wheel.scOrgDeltaY = wheel.deltaY
         wheel.scOrgRadius = wheel.radius
     end
@@ -76,10 +78,12 @@ end
 
 function scTirePressure:readStream(streamId, connection)
     self.scInflationPressure = streamReadInt(streamId)
+    self.scInflactionIsActive = streamReadBool(streamId)
 end
 
 function scTirePressure:writeStream(streamId, connection)
     streamWriteInt(streamId, self.scInflationPressure)
+    streamWriteBool(streamId, self.scInflactionIsActive)
 end
 
 function scTirePressure:updateInflationPressure()
@@ -99,8 +103,7 @@ function scTirePressure:updateInflationPressure()
 end
 
 function scTirePressure:update(dt)
-    if self.isClient
-            and self:getIsActiveForInput()
+    if self:getIsActiveForInput()
             and not self:hasInputConflictWithSelection()
             and self.scInCabTirePressureControl
             and not self.scAllWheelsCrawlers then
@@ -115,8 +118,13 @@ function scTirePressure:update(dt)
             end
 
             self:setInflationPressure(self:getInflationPressure() + pressureChange)
+        else
+            self.scInflactionIsActive = false -- Todo: fix server side code
         end
     end
+end
+
+function scTirePressure:updateTick(dt)
 end
 
 function scTirePressure:toggleTirePressure()
@@ -149,6 +157,7 @@ function scTirePressure:setInflationPressure(pressure, noEventSend)
     self.scInflationPressure = Utils.clamp(pressure, scTirePressure.PRESSURE_MIN, scTirePressure.PRESSURE_MAX)
 
     if self.scInflationPressure ~= old then
+        self.scInflactionIsActive = true
         self:updateInflationPressure()
     end
 end
@@ -194,11 +203,17 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
 
         suspensionLength = suspensionLength - wheel.deltaY
 
-        wheel.deltaY = wheel.scOrgDeltaY + suspensionLength
-        wheel.radius = wheel.scOrgRadius - suspensionLength
+        if self.scInflactionIsActive and math.abs(wheel.scPhysicsSuspensionLenght - suspensionLength) > 0.01 then
+            wheel.scPhysicsSuspensionLenght = suspensionLength
+            wheel.deltaY = wheel.scOrgDeltaY + suspensionLength
 
-        if self.isServer then
-            self:updateWheelBase(wheel)
+            -- Stijn: limit radius on deflating and inflating.. so it can't bounce at all when inflacion is active
+            -- Todo: prop need to set two booleans? Else we cannot check if target radius > radius when deflating.
+            wheel.radius = wheel.scOrgRadius - suspensionLength
+
+            if self.isServer then
+                self:updateWheelBase(wheel)
+            end
         end
 
         local dirX, dirY, dirZ = 0, -1, 0
