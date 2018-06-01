@@ -27,6 +27,7 @@ function scTirePressure:prerequisitesPresent(specializations)
 end
 
 function scTirePressure:preLoad()
+    self.updateInflaction = scTirePressure.updateInflaction
 end
 
 function scTirePressure:load(savegame)
@@ -66,7 +67,17 @@ function scTirePressure:load(savegame)
         self.sampleAirSound = SoundUtil.loadSample(self.xmlFile, {}, "vehicle.tirePressure.airSound", "$data/maps/sounds/siloFillSound.wav", self.baseDirectory, sampleNode)
     end
 
-    self:updateInflationPressure()
+    self.scDoFirstLoadRun = true
+end
+
+function scTirePressure:postLoad(savegame)
+    if savegame ~= nil and not savegame.resetVehicles then
+        local tirePressure = getXMLFloat(savegame.xmlFile, savegame.key .. "#scInflationPressure")
+
+        if tirePressure ~= nil then
+            self:setInflationPressure(tirePressure, true)
+        end
+    end
 end
 
 function scTirePressure:delete()
@@ -149,11 +160,14 @@ function scTirePressure:update(dt)
             self:setInflationPressure(self:getInflationPressure() + pressureChange)
         end
 
-        if doDeflate ~= self.scDoDeflate or doInflate ~= self.scDoInflate then
-            self.scDoDeflate = doDeflate
-            self.scDoInflate = doInflate
-            self:raiseDirtyFlags(self.scInflactionDirtyFlag)
-        end
+        self:updateInflaction(doDeflate, doInflate)
+    end
+
+    if self.firstTimeRun and self.scDoFirstLoadRun then
+        self.updateWheelsTime = 1000
+        self:updateInflationPressure()
+        self:updateInflaction(true, true)
+        self.scDoFirstLoadRun = false
     end
 end
 
@@ -163,15 +177,25 @@ function scTirePressure:updateTick(dt)
         local isCapped = pressure == scTirePressure.PRESSURE_MIN or pressure == scTirePressure.PRESSURE_MAX
 
         if (self.scDoInflate or self.scDoDeflate) and not isCapped then
-            local maxPitch = self.scDoDeflate and 1.7 or 1.2
-            local minPitch = self.scDoDeflate and 1.5 or 1
-            local pitch = Utils.lerp(minPitch, maxPitch, 1)
+            local pitch = self.scDoDeflate and 1.5 or 1
 
             SoundUtil.setSamplePitch(self.sampleAirSound, pitch)
             SoundUtil.play3DSample(self.sampleAirSound)
         else
             SoundUtil.stop3DSample(self.sampleAirSound)
         end
+    end
+end
+
+function scTirePressure:updateInflaction(doDeflate, doInflate)
+    if not self.isClient then
+        return
+    end
+
+    if doDeflate ~= self.scDoDeflate or doInflate ~= self.scDoInflate then
+        self.scDoDeflate = doDeflate
+        self.scDoInflate = doInflate
+        self:raiseDirtyFlags(self.scInflactionDirtyFlag)
     end
 end
 
@@ -233,6 +257,7 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
             if wheel.tireType ~= tireTypeCrawler then
                 local x, y, z, _ = getShaderParameter(wheel.wheelTire, PARAM_MORPH)
                 local deformation = Utils.clamp((wheel.deltaY + 0.04 - suspensionLength) * (scTirePressure.INCREASE - (self.scInflationPressure - 80) / 100), 0, wheel.maxDeformation)
+                --                local deformation = wheel.maxDeformation
 
                 -- Redo the shader morph for better graphical display.. could have just clamped the maxDeformation value but that doesn't really give the correct visual feeling.
                 setShaderParameter(wheel.wheelTire, PARAM_MORPH, x, y, z, deformation, false)

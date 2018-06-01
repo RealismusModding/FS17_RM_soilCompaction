@@ -192,18 +192,24 @@ function scAirCompressorPlaceable:flateVehicle(node, dt)
     raycastAll(x, y, z, dx, dy, dz, "airRaycastCallback", self.airDistance, self, 32 + 64 + 128 + 256 + 4096 + 8194)
 
     if self.foundVehicle ~= nil then
-        if not self.foundVehicle.scAllWheelsCrawlers then
-            local change = dt * self.inflationMultiplier
-            if self.flateDirection == -1 then
-                change = self.flateDirection * dt * self.deflationMultiplier
+        local vehicle = self.foundVehicle
+
+        if not vehicle.scAllWheelsCrawlers then
+            local doDeflate = self.flateDirection == -1
+            local pressureChange = dt * self.inflationMultiplier
+
+            if doDeflate then
+                pressureChange = -pressureChange
             end
 
-            self.foundVehicle:setInflationPressure(self.foundVehicle:getInflationPressure() + change)
-            for _, wheel in pairs(self.foundVehicle.wheels) do
-                self.foundVehicle:calculateSoilCompaction(wheel)
-                self.foundVehicle:updateWheelBase(wheel)
+            vehicle:setInflationPressure(vehicle:getInflationPressure() + pressureChange)
+            vehicle:updateInflaction(doDeflate, not doDeflate)
+
+            for _, wheel in pairs(vehicle.wheels) do
+                vehicle:calculateSoilCompaction(wheel)
             end
-            WheelsUtil.updateWheelsGraphics(self.foundVehicle, dt)
+
+            WheelsUtil.updateWheelsGraphics(vehicle, dt)
         end
     end
 end

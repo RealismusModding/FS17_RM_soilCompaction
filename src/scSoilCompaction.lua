@@ -165,7 +165,7 @@ function scSoilCompaction:applySoilCompaction()
             local x2, y2, z2
 
             local width = wheel.width
-            local radius = wheel.radius
+            local radius = wheel.radius -- Todo: don't we always want to take the orginal radius? wheel.scOrgRadius
 
             -- 4Real Ground Response changes radius of the wheel, but keeps also the original
             if wheel.radiusOriginal ~= nil then
