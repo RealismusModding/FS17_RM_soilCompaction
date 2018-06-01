@@ -203,7 +203,7 @@ function scAirCompressorPlaceable:flateVehicle(node, dt)
             end
 
             vehicle:setInflationPressure(vehicle:getInflationPressure() + pressureChange)
-            vehicle:updateInflaction(doDeflate, not doDeflate)
+            vehicle:updateInflation(doDeflate, not doDeflate)
 
             for _, wheel in pairs(vehicle.wheels) do
                 vehicle:calculateSoilCompaction(wheel)

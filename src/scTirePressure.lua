@@ -27,7 +27,7 @@ function scTirePressure:prerequisitesPresent(specializations)
 end
 
 function scTirePressure:preLoad()
-    self.updateInflaction = scTirePressure.updateInflaction
+    self.updateInflation = scTirePressure.updateInflation
 end
 
 function scTirePressure:load(savegame)
@@ -160,13 +160,13 @@ function scTirePressure:update(dt)
             self:setInflationPressure(self:getInflationPressure() + pressureChange)
         end
 
-        self:updateInflaction(doDeflate, doInflate)
+        self:updateInflation(doDeflate, doInflate)
     end
 
     if self.firstTimeRun and self.scDoFirstLoadRun then
         self.updateWheelsTime = 1000
         self:updateInflationPressure()
-        self:updateInflaction(true, true)
+        self:updateInflation(true, true)
         self.scDoFirstLoadRun = false
     end
 end
@@ -187,7 +187,7 @@ function scTirePressure:updateTick(dt)
     end
 end
 
-function scTirePressure:updateInflaction(doDeflate, doInflate)
+function scTirePressure:updateInflation(doDeflate, doInflate)
     if not self.isClient then
         return
     end
