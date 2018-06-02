@@ -41,10 +41,6 @@ function scTirePressure:load(savegame)
 
     self.scInflationPressure = scTirePressure.PRESSURE_NORMAL
 
-    if savegame ~= nil and savegame.xmlFile ~= nil then
-        self.scInflationPressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
-    end
-
     self.scInCabTirePressureControl = Utils.getNoNil(getXMLBool(self.xmlFile, "vehicle.scInCabTirePressureControl"), false)
     self.scAllWheelsCrawlers = true
 
@@ -66,15 +62,14 @@ function scTirePressure:load(savegame)
 
         self.sampleAirSound = SoundUtil.loadSample(self.xmlFile, {}, "vehicle.tirePressure.airSound", "$data/maps/sounds/siloFillSound.wav", self.baseDirectory, sampleNode)
     end
-
-    self.scDoFirstLoadRun = true
 end
 
 function scTirePressure:postLoad(savegame)
     if savegame ~= nil and not savegame.resetVehicles then
-        local tirePressure = getXMLFloat(savegame.xmlFile, savegame.key .. "#scInflationPressure")
+        local tirePressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
 
         if tirePressure ~= nil then
+            self.scDoFirstLoadRun = tirePressure ~= self.scInflationPressure
             self:setInflationPressure(tirePressure, true)
         end
     end
@@ -142,6 +137,8 @@ function scTirePressure:updateInflationPressure()
 end
 
 function scTirePressure:update(dt)
+    local oldPressure = self:getInflationPressure()
+
     if self.isClient
             and self:getIsActiveForInput()
             and not self:hasInputConflictWithSelection()
@@ -157,17 +154,20 @@ function scTirePressure:update(dt)
                 pressureChange = -pressureChange
             end
 
-            self:setInflationPressure(self:getInflationPressure() + pressureChange)
+            self:setInflationPressure(oldPressure + pressureChange)
         end
 
         self:updateInflation(doDeflate, doInflate)
     end
 
     if self.firstTimeRun and self.scDoFirstLoadRun then
-        self.updateWheelsTime = 1000
-        self:updateInflationPressure()
-        self:updateInflation(true, true)
+        -- Todo: handle first time run deformation.
         self.scDoFirstLoadRun = false
+    end
+
+    -- Force stop for compressor
+    if oldPressure == self:getInflationPressure() and (self.scDoInflate or self.scDoDeflate) then
+        self:updateInflation(false)
     end
 end
 
@@ -257,7 +257,6 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
             if wheel.tireType ~= tireTypeCrawler then
                 local x, y, z, _ = getShaderParameter(wheel.wheelTire, PARAM_MORPH)
                 local deformation = Utils.clamp((wheel.deltaY + 0.04 - suspensionLength) * (scTirePressure.INCREASE - (self.scInflationPressure - 80) / 100), 0, wheel.maxDeformation)
-                --                local deformation = wheel.maxDeformation
 
                 -- Redo the shader morph for better graphical display.. could have just clamped the maxDeformation value but that doesn't really give the correct visual feeling.
                 setShaderParameter(wheel.wheelTire, PARAM_MORPH, x, y, z, deformation, false)
@@ -276,17 +275,21 @@ function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive
         suspensionLength = suspensionLength - wheel.deltaY
 
         local isInflating = self.scDoDeflate or self.scDoInflate
+        local isCapped = self.scInflationPressure == scTirePressure.PRESSURE_MIN or self.scInflationPressure == scTirePressure.PRESSURE_MAX
 
-        if isInflating and math.abs(wheel.scPhysicsSuspensionLenght - suspensionLength) > 0.01 then
+        if isInflating and not isCapped and math.abs(wheel.scPhysicsSuspensionLenght - suspensionLength) > 0.01 then
             wheel.scPhysicsSuspensionLenght = suspensionLength
             wheel.deltaY = wheel.scOrgDeltaY + suspensionLength
 
-            -- Stijn: limit radius on deflating and inflating.. so it can't bounce at all when inflacion is active
-            -- Todo: prop need to set two booleans? Else we cannot check if target radius > radius when deflating.
-            wheel.radius = wheel.scOrgRadius - suspensionLength
+            local targetRadius = wheel.scOrgRadius - suspensionLength
+            local currentRadius = wheel.radius
 
-            if self.isServer then
-                self:updateWheelBase(wheel)
+            if not (self.scDoDeflate and targetRadius > currentRadius) and not (self.scDoInflate and targetRadius < currentRadius) then
+                wheel.radius = targetRadius
+
+                if self.isServer then
+                    self:updateWheelBase(wheel)
+                end
             end
         end
 
