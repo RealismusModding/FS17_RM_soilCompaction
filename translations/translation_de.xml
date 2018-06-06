@@ -7,6 +7,7 @@
         <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Reifendruck verringern"/>
         <text name="input_COMPRESSOR_INFLATE" text="Reifendruck erhöhen"/>
         <text name="input_COMPRESSOR_DEFLATE" text="Reifendruck verringern"/>
+        <text name="input_ACTIVATE_HANDTOOL2" text="Werkzeug aktivieren 2"/>
         <!-- Info -->
         <text name="info_TIRE_PRESSURE" text="Reifendruck: %d kPa"/>
         <!-- Warnings -->

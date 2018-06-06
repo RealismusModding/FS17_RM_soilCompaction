@@ -7,6 +7,7 @@
         <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Luchtdruk verlagen"/>
         <text name="input_COMPRESSOR_INFLATE" text="Bandenspanning verhogen"/>
         <text name="input_COMPRESSOR_DEFLATE" text="Bandenspanning verlagen"/>
+        <text name="input_ACTIVATE_HANDTOOL2" text="Activate hand tool 2"/><!-- needs translation -->
         <!-- Info -->
         <text name="info_TIRE_PRESSURE" text="Luchtdruk: %d kPa"/>
         <!-- Warnings -->

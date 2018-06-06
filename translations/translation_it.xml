@@ -7,6 +7,7 @@
         <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Diminuisci pressione"/>
         <text name="input_COMPRESSOR_INFLATE" text="Aumenta la pressione degli pneumatici"/>
         <text name="input_COMPRESSOR_DEFLATE" text="Diminuisci la pressione degli pneumatici"/>
+        <text name="input_ACTIVATE_HANDTOOL2" text="Activate hand tool 2"/><!-- needs translation -->
         <!-- Info -->
         <text name="info_TIRE_PRESSURE" text="Pressione pneumatici: %d kPa"/>
         <!-- Warnings -->
