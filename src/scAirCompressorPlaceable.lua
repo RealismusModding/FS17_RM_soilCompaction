@@ -386,6 +386,8 @@ function scAirCompressorPlaceable:canBeSold()
 end
 
 local function getVehicleByParentNode(parentId)
+    if not parentId ~= 0 then return end
+
     if g_currentMission.nodeToVehicle[parentId] ~= nil then
         return g_currentMission.nodeToVehicle[parentId]
     end
