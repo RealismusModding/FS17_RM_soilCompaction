@@ -38,7 +38,7 @@ function scAirCompressorPlaceable:load(xmlFilename, x, y, z, rx, ry, rz, initRan
 
     self.playerInRangeDistance = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.playerInRangeDistance"), 3)
     self.actionRadius = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.actionRadius#distance"), 5)
-    self.airDistance = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.airDistance"), 10)
+    self.airDistance = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.airDistance"), 5)
     self.pricePerSecond = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.pricePerSecond"), 10)
     self.inflationMultiplier = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.inflationMultiplier"), 0.005)
     self.deflationMultiplier = Utils.getNoNil(getXMLFloat(xmlFile, "placeable.airCompressor.deflationMultiplier"), 0.015)
@@ -154,11 +154,13 @@ function scAirCompressorPlaceable:update(dt)
         if self.isTurnedOn and self.doFlating then
             self.foundVehicle = nil
 
+            local node = self.currentPlayer.cameraNode
+
             if self.nozzleRaycastNode ~= nil then
-                self:flateVehicle(self.nozzleRaycastNode, dt)
-            else
-                self:flateVehicle(self.currentPlayer.cameraNode, dt)
+                node = self.nozzleRaycastNode
             end
+
+            self:flateVehicle(node, dt)
 
             local price = self.pricePerSecond * (dt / 1000)
             g_currentMission.missionStats:updateStats("expenses", price)
@@ -383,21 +385,21 @@ function scAirCompressorPlaceable:canBeSold()
     return true, nil
 end
 
+local function getVehicleByParentNode(parentId)
+    if g_currentMission.nodeToVehicle[parentId] ~= nil then
+        return g_currentMission.nodeToVehicle[parentId]
+    end
+
+    return getVehicleByParentNode(getParent(parentId))
+end
+
 -- Simple raycast to find the vehicle pointed at by the player
 function scAirCompressorPlaceable:airRaycastCallback(hitActorId, x, y, z, distance, nx, ny, nz, subShapeIndex, hitShapeId)
     local vehicle = g_currentMission.nodeToVehicle[hitActorId]
 
     if hitActorId ~= hitShapeId then
         -- object is a compoundChild. Try to find the compound
-        local parentId = hitShapeId
-        while parentId ~= 0 do
-            if g_currentMission.nodeToVehicle[parentId] ~= nil then
-                -- found valid compound
-                vehicle = g_currentMission.nodeToVehicle[parentId]
-                break
-            end
-            parentId = getParent(parentId)
-        end
+        vehicle = getVehicleByParentNode(hitShapeId)
     end
 
     if vehicle ~= nil and vehicle.getInflationPressure ~= nil and vehicle.setInflationPressure ~= nil then
