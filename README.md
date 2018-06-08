@@ -4,6 +4,8 @@
 
 This mod simulates soil compaction. Vehicles will compact the soil to varying degree depending on ground pressure, soil wetness etc. The soil can be decompacted with ploughing, rippers, cultivators etc.
 
+WARNING: You are looking at the DEVELOPMENT VERSION of the Soil Compaction mod. This can break your game!
+
 ## Soil compaction
 There are four levels of compaction (no, light, medium and heavy). The amount of soil compaction on the map can be monitored in the ingame menu "Map overview" showing "Soil composition". Higher degree of compaction will show by the deeper red colour when "Needs ploughing" is activated. This mod disables the vanilla mechanics of having to plough after every third harvest.
 
@@ -38,3 +40,29 @@ It is possible to change the tire pressure on all Motorized equipment that has w
 An in-cab tire pressure control system is available for mod tractors by adding the following to the vehicle.xml file:
 
     <scInCabTirePressureControl>true</scInCabTirePressureControl>
+
+## Publishing
+Only the Realismus Modding team is allowed to publish any of this code as a mod to any mod site, or file sharing site. The code is open for your own use, but give credit where due. Thus, when building your own version of Soil Compaction, give a credit notice to Realismus Modding when publishing screenshots or images. This is not required when using the only official published mod by Realismis Modding, on Giants ModHub. It would be a nice gesture however.
+
+Making videos of development version
+We have a couple of rules regarding videos to keep both our and our players experience the best. You are allowed to make videos with Soil Compaction, under a couple of simple conditions:
+
+Do not share the GitHub link, if you are using a development version of the mod.
+
+Do not explain how to install this mod. (The mod might also change at any moment, making your video outdated)
+
+Give credit to 'Realismus Modding' as creators of the mod.
+
+Link to our YouTube channel.
+
+You do not need to put the mod name in the video title, but you can if you want.
+
+Join us on Slack and tell us all about your awesome video.
+
+Videos that are not holding to the rules will get a request for removal. If you have any questions about this policy you can ask them on Slack.
+
+## Forking the code
+You are allowed to fork this repository, apply changes and use those for private use. You are not allowed to distribute these changes yourself. Please open a pull request to allow for merging back your adjustments. (See also 'Publishing')
+
+## Pull Requests
+Please join us on Slack to discuss any changes you wish to make via pull requests, otherwise they are likely to be rejected, except for translations.
