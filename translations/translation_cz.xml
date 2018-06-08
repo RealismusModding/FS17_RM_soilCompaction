@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <!-- Inputs -->
+        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Hloubka kultivace (%s)"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Zvýšit tlak pneumatik"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Snížit tlak pneumatik"/>
+        <text name="input_COMPRESSOR_INFLATE" text="Zvýšit tlak pneumatik"/>
+        <text name="input_COMPRESSOR_DEFLATE" text="Snížit tlak pneumatik"/>
+        <text name="input_ACTIVATE_HANDTOOL2" text="Aktivovat hand tool 2"/>
+        <!-- Info -->
+        <text name="info_TIRE_PRESSURE" text="Tlak v pneumatikách: %d kPa"/>
+        <!-- Warnings -->
+        <text name="warning_compressorRangeRestriction"
+              text="Hadice kompresoru je krátká, nemůžete jít dále."/>
+        <text name="warning_tireload" text="Tlak v pneumatikách je nízký. Zvyšte tlak pneumatik u %s!"/>
+        <!-- General -->
+        <text name="typeDesc_airCompressor" text="vzduchový kompresor"/>
+        <text name="function_airCompressor" text="Se vzduchovým kompresorem můžete nahustit pneumatiky u svých strojů."/>
+
+        <text name="CULTIVATION_DEPTH_1" text="mělká"/>
+        <text name="CULTIVATION_DEPTH_2" text="hluboká"/>
+
+        <text name="COMPACTION_0" text="%s způsobuje těžké stlačení půdy"/>
+        <text name="COMPACTION_1" text="%s způsobuje střední stlačení půdy"/>
+        <text name="COMPACTION_2" text="%s způsobuje lehké stlačení půdy"/>
+        <text name="COMPACTION_3" text="%s nezpůsobuje stlačení půdy"/>
+    </texts>
+</l10n>
