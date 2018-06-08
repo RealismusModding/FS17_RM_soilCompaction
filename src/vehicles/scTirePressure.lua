@@ -52,7 +52,6 @@ function scTirePressure:load(savegame)
 
         wheel.scPhysicsSuspensionLenght = wheel.netInfo.suspensionLength
         wheel.scOrgDeltaY = wheel.deltaY
-        wheel.scOrgRadius = wheel.radius
     end
 
     self.scInflactionDirtyFlag = self:getNextDirtyFlag()
@@ -206,9 +205,10 @@ end
 function scTirePressure:draw()
     if self.isClient then
         if self.scInCabTirePressureControl and not self.scAllWheelsCrawlers then
+            local pressure = self:getInflationPressure()
             g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_INFLATE"), InputBinding.SOILCOMPACTION_TIRE_INFLATE)
             g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_TIRE_DEFLATE"), InputBinding.SOILCOMPACTION_TIRE_DEFLATE)
-            g_currentMission:addExtraPrintText(g_i18n:getText("info_TIRE_PRESSURE"):format(self:getInflationPressure()))
+            g_currentMission:addExtraPrintText(g_i18n:getText("info_TIRE_PRESSURE"):format(pressure / 100))
         end
     end
 

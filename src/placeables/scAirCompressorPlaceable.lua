@@ -435,7 +435,8 @@ function scAirCompressorPlaceable.drawNozzle(tool)
         g_currentMission:addHelpButtonText(g_i18n:getText("input_COMPRESSOR_DEFLATE"), InputBinding.ACTIVATE_HANDTOOL2)
 
         if compressor.doFlating and compressor.foundVehicle ~= nil and compressor.foundVehicle.getInflationPressure ~= nil then
-            g_currentMission:addExtraPrintText(string.format(g_i18n:getText("info_TIRE_PRESSURE"), compressor.foundVehicle:getInflationPressure()))
+            local pressure = compressor.foundVehicle:getInflationPressure()
+            g_currentMission:addExtraPrintText(g_i18n:getText("info_TIRE_PRESSURE"):format(pressure / 100))
         end
     end
 end

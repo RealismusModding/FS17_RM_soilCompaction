@@ -9,7 +9,7 @@
         <text name="input_COMPRESSOR_DEFLATE" text="Zmniejsz ciśnienie w oponach"/>
         <text name="input_ACTIVATE_HANDTOOL2" text="Aktywuj narzędzie ręczne 2"/>
         <!-- Info -->
-        <text name="info_TIRE_PRESSURE" text="Ciśnienie w oponach: %d kPa"/>
+        <text name="info_TIRE_PRESSURE" text="Ciśnienie w oponach: %1.2f bar"/>
         <!-- Warnings -->
         <text name="warning_compressorRangeRestriction" text="Rozciągnąłeś maksymalnie wąż od sprężarki, dalej nie pójdziesz!"/>
         <text name="warning_tireload" text="Obciążenie opony jest zbyt wysokie. Zwiększ ciśnienie w oponach na %s!"/>

@@ -9,10 +9,9 @@
         <text name="input_COMPRESSOR_DEFLATE" text="Snížit tlak pneumatik"/>
         <text name="input_ACTIVATE_HANDTOOL2" text="Aktivovat hand tool 2"/>
         <!-- Info -->
-        <text name="info_TIRE_PRESSURE" text="Tlak v pneumatikách: %d kPa"/>
+        <text name="info_TIRE_PRESSURE" text="Tlak v pneumatikách: %1.2f bar"/>
         <!-- Warnings -->
-        <text name="warning_compressorRangeRestriction"
-              text="Hadice kompresoru je krátká, nemůžete jít dále."/>
+        <text name="warning_compressorRangeRestriction" text="Hadice kompresoru je krátká, nemůžete jít dále."/>
         <text name="warning_tireload" text="Tlak v pneumatikách je nízký. Zvyšte tlak pneumatik u %s!"/>
         <!-- General -->
         <text name="typeDesc_airCompressor" text="vzduchový kompresor"/>

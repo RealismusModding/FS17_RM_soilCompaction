@@ -9,7 +9,7 @@
         <text name="input_COMPRESSOR_DEFLATE" text="Diminuisci la pressione degli pneumatici"/>
         <text name="input_ACTIVATE_HANDTOOL2" text="Activate hand tool 2"/><!-- needs translation -->
         <!-- Info -->
-        <text name="info_TIRE_PRESSURE" text="Pressione pneumatici: %d kPa"/>
+        <text name="info_TIRE_PRESSURE" text="Pressione pneumatici: %1.2f bar"/>
         <!-- Warnings -->
         <text name="warning_compressorRangeRestriction" text="Il tubo del compressore non ti permette di allontanarti oltre"/>
         <text name="warning_tireload" text="Il carico sugli pneumatici è troppo alto. Aumentare la pressione degli pneumatici sul %s!"/>

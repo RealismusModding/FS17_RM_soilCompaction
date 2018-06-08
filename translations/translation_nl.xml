@@ -9,7 +9,7 @@
         <text name="input_COMPRESSOR_DEFLATE" text="Bandenspanning verlagen"/>
         <text name="input_ACTIVATE_HANDTOOL2" text="Activate hand tool 2"/><!-- needs translation -->
         <!-- Info -->
-        <text name="info_TIRE_PRESSURE" text="Luchtdruk: %d kPa"/>
+        <text name="info_TIRE_PRESSURE" text="Luchtdruk: %1.2f bar"/>
         <!-- Warnings -->
         <text name="warning_compressorRangeRestriction"
               text="De compressor slang is te kort, om verder te kunnen lopen."/>

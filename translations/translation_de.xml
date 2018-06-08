@@ -9,7 +9,7 @@
         <text name="input_COMPRESSOR_DEFLATE" text="Reifendruck verringern"/>
         <text name="input_ACTIVATE_HANDTOOL2" text="Werkzeug aktivieren 2"/>
         <!-- Info -->
-        <text name="info_TIRE_PRESSURE" text="Reifendruck: %d kPa"/>
+        <text name="info_TIRE_PRESSURE" text="Reifendruck: %1.2f bar"/>
         <!-- Warnings -->
         <text name="warning_compressorRangeRestriction"
               text="Der Kompressorschlauch ist nicht lang genug, um weiter zu gehen"/>
