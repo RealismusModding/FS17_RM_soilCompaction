@@ -10,6 +10,7 @@
         <fr>Soil Compaction</fr>
         <pl>Zagęszczenie gleby</pl>
         <nl>Bodemverdichting</nl>
+		<cz>Stlačení půdy</cz>
     </title>
 
     <description>
@@ -18,6 +19,7 @@
         <fr><![CDATA[Soil Compaction]]></fr>
         <pl><![CDATA[Zagęszczenie gleby]]></pl>
         <nl><![CDATA[Bodemverdichting]]></nl>
+        <cz><![CDATA[Stlačení půdy]]></cz>
     </description>
 
     <iconFilename>icon.png</iconFilename>
