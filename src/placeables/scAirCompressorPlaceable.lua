@@ -219,15 +219,11 @@ end
 function scAirCompressorPlaceable:updateTick(dt)
     scAirCompressorPlaceable:superClass().updateTick(self, dt)
 
-    local isPlayerInRange, player = self:getIsPlayerInRange(self.playerInRangeDistance)
+    self.isPlayerInRange, self.playerInRange = self:getIsPlayerInRange(self.playerInRangeDistance)
 
-    if isPlayerInRange then
-        self.playerInRange = player
-        self.isPlayerInRange = true
+    if self.isPlayerInRange then
         g_currentMission:addActivatableObject(self.activatable)
     else
-        self.playerInRange = nil
-        self.isPlayerInRange = false
         g_currentMission:removeActivatableObject(self.activatable)
     end
 end

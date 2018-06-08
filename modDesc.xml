@@ -27,8 +27,7 @@
     <multiplayer supported="true"/>
 
     <extraSourceFiles>
-        <sourceFile filename="src/scCompactionManager.lua"/>
-        <sourceFile filename="src/scAirCompressorPlaceable.lua"/>
+        <sourceFile filename="src/loader.lua"/>
     </extraSourceFiles>
 
     <inputBindings>

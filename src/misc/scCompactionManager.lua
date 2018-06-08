@@ -2,7 +2,7 @@
 -- (SOIL) COMPACTION MANAGER SCRIPT
 ----------------------------------------------------------------------------------------------------
 -- Purpose:  To add soil compaction
--- Authors:  baron, reallogger
+-- Authors:  baron, reallogger, Wopster
 --
 -- Copyright (c) Realismus Modding, 2017
 ----------------------------------------------------------------------------------------------------
@@ -23,24 +23,77 @@ scCompactionManager.overlayColor[false] = {
 }
 
 scCompactionManager.overlayColor[true] = {
-    { 0.6172, 0.0510, 0.0510, 1 },
+    { 1.0000, 0.8632, 0.0232, 1 },
     { 0.6400, 0.1710, 0.1710, 1 },
     { 0.6672, 0.3333, 0.3333, 1 },
 }
 
+local toInsert = {
+    ["soilCompaction"] = {},
+    ["atWorkshop"] = {},
+    ["tirePressure"] = {
+        requires = {},
+        needsOne = { Motorized, Trailer, HookLiftTrailer, LivestockTrailer, ManureBarrel, FuelTrailer },
+        notWith = { HookLiftContainer }
+    }, -- Todo: Motorized vs Drivable?
+    ["deepCultivator"] = {
+        requires = { Cultivator },
+        needsOne = {}
+    },
+}
+
+local function strategyInsert(specializations)
+    for name, c in pairs(toInsert) do
+        local doInsert = true
+
+        -- All these specs are required.
+        if c.requires and #c.requires ~= 0 then
+            for _, specialization in pairs(c.requires) do
+                if not SpecializationUtil.hasSpecialization(specialization, specializations) then
+                    doInsert = false
+                    break
+                end
+            end
+        end
+
+        -- Needs atleast one of these specs.
+        if c.needsOne and #c.needsOne ~= 0 then
+            doInsert = false
+
+            for _, specialization in pairs(c.needsOne) do
+                if SpecializationUtil.hasSpecialization(specialization, specializations) then
+                    if c.notWith and #c.notWith ~= 0 then
+                        doInsert = true
+
+                        for _, specialization in pairs(c.notWith) do
+                            if SpecializationUtil.hasSpecialization(specialization, specializations) then
+                                doInsert = false
+                                break
+                            end
+                        end
+                    else
+                        doInsert = true
+                    end
+
+                    break
+                end
+            end
+        end
+
+        if doInsert then
+            table.insert(specializations, SpecializationUtil.getSpecialization(name))
+        end
+    end
+end
+
+function scCompactionManager:preLoadSoilCompaction()
+    InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
+end
+
 function scCompactionManager:installVehicleSpecializations()
     for _, vehicleType in pairs(VehicleTypeUtil.vehicleTypes) do
         if vehicleType ~= nil then
-            table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("soilCompaction"))
-            table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("atWorkshop"))
-
-            if SpecializationUtil.hasSpecialization(Motorized, vehicleType.specializations) then
-                table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("tirePressure"))
-            end
-
-            if SpecializationUtil.hasSpecialization(Cultivator, vehicleType.specializations) then
-                table.insert(vehicleType.specializations, SpecializationUtil.getSpecialization("deepCultivator"))
-            end
+            strategyInsert(vehicleType.specializations)
         end
     end
 end
@@ -216,12 +269,3 @@ function mathRound(value, idp)
     local mult = 10 ^ (idp or 0)
     return math.floor(value * mult + 0.5) / mult
 end
-
-SpecializationUtil.registerSpecialization("deepCultivator", "scDeepCultivator", scCompactionManager.modDir .. "src/scDeepCultivator.lua")
-SpecializationUtil.registerSpecialization("soilCompaction", "scSoilCompaction", scCompactionManager.modDir .. "src/scSoilCompaction.lua")
-SpecializationUtil.registerSpecialization("tirePressure", "scTirePressure", scCompactionManager.modDir .. "src/scTirePressure.lua")
-SpecializationUtil.registerSpecialization("atWorkshop", "scAtWorkshop", scCompactionManager.modDir .. "src/scAtWorkshop.lua")
-
-InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
-
-addModEventListener(scCompactionManager)
