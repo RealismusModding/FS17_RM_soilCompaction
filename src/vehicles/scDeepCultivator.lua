@@ -15,7 +15,8 @@ scDeepCultivator.DEPTH_DEEP = 2
 scDeepCultivator.DEPTH_MAX = scDeepCultivator.DEPTH_DEEP
 
 function scDeepCultivator:prerequisitesPresent(specializations)
-    return SpecializationUtil.hasSpecialization(Cultivator, specializations)
+    return SpecializationUtil.hasSpecialization(Cultivator, specializations) and
+            SpecializationUtil.hasSpecialization(PowerConsumer, specializations)
 end
 
 function scDeepCultivator:preLoad()
@@ -67,14 +68,14 @@ function scDeepCultivator.isStoreItemDeepCultivator(storeItem)
     end
 
     if storeItem.name == "CULTIMER L 300" -- Fails to listen to the algo
-        or deepCultivatorMod -- special designation
-        or maxForce / workingWidth > 6 then -- a lot of force on a small area: assume deep
+            or deepCultivatorMod -- special designation
+            or maxForce / workingWidth > 6 then -- a lot of force on a small area: assume deep
         return true
     end
 
     -- Subsoilers act always deep (as a plough)
     if typeName == "subsoiler" -- Platinum DLC
-        or subsoilerMod then
+            or subsoilerMod then
         return false, 3
     end
 
@@ -97,7 +98,7 @@ end
 function scDeepCultivator:getSaveAttributesAndNodes(nodeIdent)
     local attributes = ""
 
-    attributes = attributes .. "scCultivationDepth=\"" .. self.scCultivationDepth ..  "\" "
+    attributes = attributes .. "scCultivationDepth=\"" .. self.scCultivationDepth .. "\" "
 
     return attributes, ""
 end
@@ -122,8 +123,9 @@ end
 
 function scDeepCultivator:update(dt)
     if not g_currentMission:getIsServer()
-        or not self.scValidDeepCultivator then
-        return end
+            or not self.scValidDeepCultivator then
+        return
+    end
 
     if self:getIsActiveForInput(true) then
         local cultivationDepthText = g_i18n:getText("CULTIVATION_DEPTH_" .. tostring(self.scCultivationDepth))
@@ -140,13 +142,13 @@ function scDeepCultivator:processCultivatorAreas(superFunc, ...)
     local depth = self.scCultivationDepth
 
     local oldAreaUpdater = Utils.updateCultivatorArea
-    Utils.updateCultivatorArea = function (startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, forced, commonForced, angle)
+    Utils.updateCultivatorArea = function(startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, forced, commonForced, angle)
 
         -- checking what crop is cultivated and what stage it is
         local crop = nil
         for index, fruit in pairs(g_currentMission.fruits) do
             local fruitDesc = FruitUtil.fruitIndexToDesc[index]
-            local a, b, _ = getDensityParallelogram(fruit.id, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ,  0, g_currentMission.numFruitDensityMapChannels)
+            local a, b, _ = getDensityParallelogram(fruit.id, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, 0, g_currentMission.numFruitDensityMapChannels)
 
             if a ~= nil then
                 if a > 0 then
