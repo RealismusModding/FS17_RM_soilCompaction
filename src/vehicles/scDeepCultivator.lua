@@ -21,12 +21,10 @@ end
 
 function scDeepCultivator:preLoad()
     self.updateCultivationDepth = scDeepCultivator.updateCultivationDepth
+    self.processCultivatorAreas = Utils.overwrittenFunction(self.processCultivatorAreas, scDeepCultivator.processCultivatorAreas)
 end
 
 function scDeepCultivator:load(savegame)
-    self.updateCultivationDepth = scDeepCultivator.updateCultivationDepth
-    self.processCultivatorAreas = Utils.overwrittenFunction(self.processCultivatorAreas, scDeepCultivator.processCultivatorAreas);
-
     self.scCultivationDepth = scDeepCultivator.DEPTH_SHALLOW
 
     self.scOrigMaxForce = self.powerConsumer.maxForce
@@ -85,10 +83,10 @@ end
 function scDeepCultivator:delete()
 end
 
-function scDeepCultivator:mouseEvent(posX, posY, isDown, isUp, button)
+function scDeepCultivator:mouseEvent(...)
 end
 
-function scDeepCultivator:keyEvent(unicode, sym, modifier, isDown)
+function scDeepCultivator:keyEvent(...)
 end
 
 function scDeepCultivator:loadFromAttributesAndNodes(xmlFile, key)
@@ -118,7 +116,7 @@ function scDeepCultivator:updateCultivationDepth()
         self.powerConsumer.maxForce = self.scOrigMaxForce * scDeepCultivator.SHALLOW_FORCE_FACTOR
     end
 
-    -- TODO(Jos) send event with new cultivation depth
+    -- Todo: send event with new cultivation depth
 end
 
 function scDeepCultivator:update(dt)
@@ -127,6 +125,7 @@ function scDeepCultivator:update(dt)
         return
     end
 
+    -- Todo: Stijn this is client sided code.. but we force server above ^
     if self:getIsActiveForInput(true) then
         local cultivationDepthText = g_i18n:getText("CULTIVATION_DEPTH_" .. tostring(self.scCultivationDepth))
         -- need to set a new inputBinding
@@ -142,10 +141,10 @@ function scDeepCultivator:processCultivatorAreas(superFunc, ...)
     local depth = self.scCultivationDepth
 
     local oldAreaUpdater = Utils.updateCultivatorArea
-    Utils.updateCultivatorArea = function(startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, forced, commonForced, angle)
 
+    Utils.updateCultivatorArea = function(startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, forced, commonForced, angle)
         -- checking what crop is cultivated and what stage it is
-        local crop = nil
+        local crop
         for index, fruit in pairs(g_currentMission.fruits) do
             local fruitDesc = FruitUtil.fruitIndexToDesc[index]
             local a, b, _ = getDensityParallelogram(fruit.id, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, 0, g_currentMission.numFruitDensityMapChannels)

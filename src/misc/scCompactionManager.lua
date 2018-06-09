@@ -29,8 +29,16 @@ scCompactionManager.overlayColor[true] = {
 }
 
 local toInsert = {
-    ["soilCompaction"] = {},
-    ["atWorkshop"] = {},
+    ["soilCompaction"] = {
+        requires = {},
+        needsOne = {},
+        notWith = {}
+    },
+    ["atWorkshop"] = {
+        requires = {},
+        needsOne = {},
+        notWith = {}
+    },
     ["tirePressure"] = {
         requires = {},
         needsOne = { Motorized, Trailer, HookLiftTrailer, LivestockTrailer, ManureBarrel, FuelTrailer },
@@ -38,41 +46,40 @@ local toInsert = {
     }, -- Todo: Motorized vs Drivable?
     ["deepCultivator"] = {
         requires = { Cultivator },
-        needsOne = {}
+        needsOne = {},
+        notWith = {}
     },
 }
 
+local function allowInsert(specialization, specializations)
+    return SpecializationUtil.hasSpecialization(specialization, specializations)
+end
+
 local function strategyInsert(specializations)
-    for name, c in pairs(toInsert) do
+    for name, i in pairs(toInsert) do
         local doInsert = true
 
         -- All these specs are required.
-        if c.requires and #c.requires ~= 0 then
-            for _, specialization in pairs(c.requires) do
-                if not SpecializationUtil.hasSpecialization(specialization, specializations) then
-                    doInsert = false
-                    break
-                end
-            end
+        for _, specialization in pairs(i.requires) do
+            doInsert = allowInsert(specialization, specializations)
+            if not doInsert then break end
         end
 
         -- Needs atleast one of these specs.
-        if c.needsOne and #c.needsOne ~= 0 then
-            doInsert = false
+        if doInsert then
+            doInsert = not #i.needsOne ~= 0
 
-            for _, specialization in pairs(c.needsOne) do
-                if SpecializationUtil.hasSpecialization(specialization, specializations) then
-                    if c.notWith and #c.notWith ~= 0 then
-                        doInsert = true
+            for _, specialization in pairs(i.needsOne) do
+                doInsert = allowInsert(specialization, specializations)
 
-                        for _, specialization in pairs(c.notWith) do
-                            if SpecializationUtil.hasSpecialization(specialization, specializations) then
-                                doInsert = false
-                                break
-                            end
+                if doInsert then
+                    for _, specialization in pairs(i.notWith) do
+                        local hasInvalidCombination = allowInsert(specialization, specializations)
+
+                        if hasInvalidCombination then
+                            doInsert = not doInsert
+                            break
                         end
-                    else
-                        doInsert = true
                     end
 
                     break
@@ -88,6 +95,9 @@ end
 
 function scCompactionManager:preLoadSoilCompaction()
     InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
+
+    scUtils.overwrittenStaticFunction(Utils, "cutFruitArea", scCompactionManager.cutFruitArea)
+    scUtils.overwrittenStaticFunction(Utils, "updateCultivatorArea", scCompactionManager.updateCultivatorArea)
 end
 
 function scCompactionManager:installVehicleSpecializations()
@@ -96,14 +106,6 @@ function scCompactionManager:installVehicleSpecializations()
             strategyInsert(vehicleType.specializations)
         end
     end
-end
-
-function scCompactionManager:load(savegame, key)
-    Utils.updateCultivatorArea = Utils.overwrittenFunction(Utils.updateCultivatorArea, scCompactionManager.updateCompactionCultivatorArea)
-    Utils.cutFruitArea = Utils.overwrittenFunction(Utils.cutFruitArea, scCompactionManager.cutFruitArea)
-end
-
-function scCompactionManager:save(savegame, key)
 end
 
 function scCompactionManager:loadMap()
@@ -120,18 +122,6 @@ function scCompactionManager:deleteMap()
     end
 end
 
-function scCompactionManager:mouseEvent(...)
-end
-
-function scCompactionManager:keyEvent(...)
-end
-
-function scCompactionManager:readStream(streamId, connection)
-end
-
-function scCompactionManager:writeStream(streamId, connection)
-end
-
 function scCompactionManager:update(dt)
 end
 
@@ -145,16 +135,16 @@ function scCompactionManager.cutFruitArea(superFunc, fruitId, startWorldX, start
     -- Setting to 0 makes the use of it affect nothing
     g_currentMission.ploughCounterNumChannels = 0
 
-    local volume, area, sprayFactor, ploughFactor, growthState, growthStateArea = superFunc(fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
+    local volume, area, sprayFactor, _, growthState, growthStateArea = superFunc(fruitId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, ...)
 
     g_currentMission.ploughCounterNumChannels = tmpNumChannels
 
     -- Depending on compaction yield is determined
+    local detailId = g_currentMission.terrainDetailId
     local x0, z0, widthX, widthZ, heightX, heightZ = Utils.getXZWidthAndHeight(detailId, startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ)
-    local densityC, areaC, _ = getDensityParallelogram(g_currentMission.terrainDetailId, x0, z0, widthX, widthZ, heightX, heightZ, g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels)
+    local densityC, areaC, _ = getDensityParallelogram(detailId, x0, z0, widthX, widthZ, heightX, heightZ, g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels)
     local compactionLayers = densityC / areaC
-
-    ploughFactor = 2 * compactionLayers - 5
+    local ploughFactor = 2 * compactionLayers - 5
 
     -- Special rules for grass
     if fruitId == FruitUtil.FRUITTYPE_GRASS then
@@ -219,53 +209,4 @@ function scCompactionManager:inGameMenuGenerateFruitOverlay(superFunc)
     else
         superFunc(self)
     end
-end
-
-function logInfo(...)
-    local str = "[Soil Compaction]"
-    for i = 1, select("#", ...) do
-        str = str .. " " .. tostring(select(i, ...))
-    end
-    print(str)
-end
-
-function print_r(t)
-    local print_r_cache = {}
-    local function sub_print_r(t, indent)
-        if (print_r_cache[tostring(t)]) then
-            print(indent .. "*" .. tostring(t))
-        else
-            print_r_cache[tostring(t)] = true
-            if (type(t) == "table") then
-                for pos, val in pairs(t) do
-                    pos = tostring(pos)
-                    if (type(val) == "table") then
-                        print(indent .. "[" .. pos .. "] => " .. tostring(t) .. " {")
-                        sub_print_r(val, indent .. string.rep(" ", string.len(pos) + 8))
-                        print(indent .. string.rep(" ", string.len(pos) + 6) .. "}")
-                    elseif (type(val) == "string") then
-                        print(indent .. "[" .. pos .. '] => "' .. val .. '"')
-                    else
-                        print(indent .. "[" .. pos .. "] => " .. tostring(val))
-                    end
-                end
-            else
-                print(indent .. tostring(t))
-            end
-        end
-    end
-
-    if (type(t) == "table") then
-        print(tostring(t) .. " {")
-        sub_print_r(t, "  ")
-        print("}")
-    else
-        sub_print_r(t, "  ")
-    end
-    print()
-end
-
-function mathRound(value, idp)
-    local mult = 10 ^ (idp or 0)
-    return math.floor(value * mult + 0.5) / mult
 end
