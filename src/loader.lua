@@ -41,6 +41,8 @@ local isNoRestart = false --<%=norestart %>
 
 -- Source files
 local files = {
+    -- utilities
+    ('%s/utils/%s'):format(srcDirectory, 'scUtils'),
     -- main
     ('%s/misc/%s'):format(srcDirectory, 'scCompactionManager'),
     -- placeables
