@@ -107,16 +107,18 @@ end
 function scDeepCultivator:writeStream(streamId, connection)
 end
 
-function scDeepCultivator:updateCultivationDepth()
-    self.scCultivationDepth = self.scCultivationDepth + 1
-    self.powerConsumer.maxForce = self.scOrigMaxForce
+function scDeepCultivator:updateCultivationDepth(newDepth, noEventSend)
+    CultivationDepthEvent.sendEvent(self, newDepth, noEventSend)
 
-    if self.scCultivationDepth > scDeepCultivator.DEPTH_MAX then
-        self.scCultivationDepth = scDeepCultivator.DEPTH_SHALLOW
-        self.powerConsumer.maxForce = self.scOrigMaxForce * scDeepCultivator.SHALLOW_FORCE_FACTOR
+    local maxForce = self.scOrigMaxForce
+
+    if newDepth > scDeepCultivator.DEPTH_MAX then
+        maxForce = maxForce * scDeepCultivator.SHALLOW_FORCE_FACTOR
+        newDepth = scDeepCultivator.DEPTH_SHALLOW
     end
 
-    -- Todo: send event with new cultivation depth
+    self.scCultivationDepth = newDepth
+    self.powerConsumer.maxForce = maxForce
 end
 
 function scDeepCultivator:update(dt)
@@ -132,7 +134,7 @@ function scDeepCultivator:update(dt)
         g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_CULTIVATION_DEPTH"), cultivationDepthText), InputBinding.IMPLEMENT_EXTRA4, nil, GS_PRIO_HIGH)
 
         if InputBinding.hasEvent(InputBinding.IMPLEMENT_EXTRA4) then
-            self:updateCultivationDepth()
+            self:updateCultivationDepth(self.scCultivationDepth + 1)
         end
     end
 end
@@ -179,4 +181,53 @@ function scDeepCultivator:processCultivatorAreas(superFunc, ...)
 end
 
 function scDeepCultivator:draw()
+end
+
+CultivationDepthEvent = {}
+CultivationDepthEvent_mt = Class(CultivationDepthEvent, Event)
+
+InitEventClass(CultivationDepthEvent, "CultivationDepthEvent")
+
+function CultivationDepthEvent:emptyNew()
+    local event = Event:new(CultivationDepthEvent_mt)
+    return event
+end
+
+function CultivationDepthEvent:new(object, newDepth)
+    local event = CultivationDepthEvent:emptyNew()
+
+    event.object = object
+    event.newDepth = newDepth
+
+    return event
+end
+
+function CultivationDepthEvent:readStream(streamId, connection)
+    self.object = readNetworkNodeObject(streamId)
+    self.newDepth = streamReadInt(streamId)
+
+    self:run(connection)
+end
+
+function CultivationDepthEvent:writeStream(streamId, connection)
+    writeNetworkNodeObject(streamId, self.object)
+    streamWriteInt(streamId, self.newDepth)
+end
+
+function CultivationDepthEvent:run(connection)
+    self.object:updateCultivationDepth(self.newDepth, true)
+
+    if not connection:getIsServer() then
+        g_server:broadcastEvent(self, false, connection, self.object)
+    end
+end
+
+function CultivationDepthEvent.sendEvent(object, newDepth, noEventSend)
+    if noEventSend == nil or noEventSend == false then
+        if g_server ~= nil then
+            g_server:broadcastEvent(CultivationDepthEvent:new(object, newDepth), nil, nil, object)
+        else
+            g_client:getServerConnection():sendEvent(CultivationDepthEvent:new(object, newDepth))
+        end
+    end
 end
