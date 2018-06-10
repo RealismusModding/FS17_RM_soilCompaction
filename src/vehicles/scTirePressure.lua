@@ -92,13 +92,13 @@ function scTirePressure:getSaveAttributesAndNodes(nodeIdent)
 end
 
 function scTirePressure:readStream(streamId, connection)
-    self.scInflationPressure = streamReadInt(streamId)
+    self.scInflationPressure = streamReadInt8(streamId)
     self.scDoDeflate = streamReadBool(streamId)
     self.scDoInflate = streamReadBool(streamId)
 end
 
 function scTirePressure:writeStream(streamId, connection)
-    streamWriteInt(streamId, self.scInflationPressure)
+    streamWriteInt8(streamId, self.scInflationPressure)
     streamWriteBool(streamId, self.scDoDeflate)
     streamWriteBool(streamId, self.scDoInflate)
 end
@@ -334,14 +334,14 @@ end
 
 function SetInflationPressureEvent:readStream(streamId, connection)
     self.object = readNetworkNodeObject(streamId)
-    self.pressure = streamReadInt(streamId)
+    self.pressure = streamReadInt8(streamId)
 
     self:run(connection)
 end
 
 function SetInflationPressureEvent:writeStream(streamId, connection)
     writeNetworkNodeObject(streamId, self.object)
-    streamWriteInt(streamId, self.pressure)
+    streamWriteInt8(streamId, self.pressure)
 end
 
 function SetInflationPressureEvent:run(connection)

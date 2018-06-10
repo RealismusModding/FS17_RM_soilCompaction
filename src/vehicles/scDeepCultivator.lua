@@ -204,14 +204,14 @@ end
 
 function CultivationDepthEvent:readStream(streamId, connection)
     self.object = readNetworkNodeObject(streamId)
-    self.newDepth = streamReadInt(streamId)
+    self.newDepth = streamReadInt8(streamId)
 
     self:run(connection)
 end
 
 function CultivationDepthEvent:writeStream(streamId, connection)
     writeNetworkNodeObject(streamId, self.object)
-    streamWriteInt(streamId, self.newDepth)
+    streamWriteInt8(streamId, self.newDepth)
 end
 
 function CultivationDepthEvent:run(connection)
