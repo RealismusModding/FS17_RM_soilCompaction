@@ -88,6 +88,7 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     if wheel.additionalWheels ~= nil then
         for _, additionalWheel in pairs(wheel.additionalWheels) do
             numWheels = numWheels + 1
+            width = width + additionalWheel.width
         end
     end
 
