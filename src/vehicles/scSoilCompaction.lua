@@ -84,10 +84,15 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
     -- TODO: Increase load when MR is not loaded as vanilla tractors are too light
 
-    local numWheels = table.getn(self.wheels)
+    local numWheels = #self.wheels
+    for _, wheel in pairs(self.wheels) do
+        if wheel.additionalWheels ~= nil then
+           numWheels = numWheels + #wheel.additionalWheels
+        end
+    end
+
     if wheel.additionalWheels ~= nil then
         for _, additionalWheel in pairs(wheel.additionalWheels) do
-            numWheels = numWheels + 1
             width = width + additionalWheel.width
         end
     end
