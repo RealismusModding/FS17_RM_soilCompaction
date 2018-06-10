@@ -122,20 +122,23 @@ function scDeepCultivator:updateCultivationDepth(newDepth, noEventSend)
 end
 
 function scDeepCultivator:update(dt)
-    if not g_currentMission:getIsServer()
-            or not self.scValidDeepCultivator then
+    if not self.isClient or
+            not self.scValidDeepCultivator then
         return
     end
 
-    -- Todo: Stijn this is client sided code.. but we force server above ^
-    if self:getIsActiveForInput(true) then
-        local cultivationDepthText = g_i18n:getText("CULTIVATION_DEPTH_" .. tostring(self.scCultivationDepth))
-        -- need to set a new inputBinding
-        g_currentMission:addHelpButtonText(string.format(g_i18n:getText("input_SOILCOMPACTION_CULTIVATION_DEPTH"), cultivationDepthText), InputBinding.IMPLEMENT_EXTRA4, nil, GS_PRIO_HIGH)
-
+    if self:getIsActive() and self:getIsActiveForInput(true) and not self:hasInputConflictWithSelection() then
         if InputBinding.hasEvent(InputBinding.IMPLEMENT_EXTRA4) then
             self:updateCultivationDepth(self.scCultivationDepth + 1)
         end
+    end
+end
+
+function scDeepCultivator:draw()
+    if self.isClient then
+        local cultivationDepthText = g_i18n:getText(("CULTIVATION_DEPTH_%d"):format(tostring(self.scCultivationDepth)))
+        -- Todo: need to set a new inputBinding?
+        g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_CULTIVATION_DEPTH"):format(cultivationDepthText), InputBinding.IMPLEMENT_EXTRA4, nil, GS_PRIO_HIGH)
     end
 end
 
@@ -178,9 +181,6 @@ function scDeepCultivator:processCultivatorAreas(superFunc, ...)
     Utils.updateCultivatorArea = oldAreaUpdater
 
     return sumArea
-end
-
-function scDeepCultivator:draw()
 end
 
 CultivationDepthEvent = {}
