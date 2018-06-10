@@ -94,6 +94,17 @@ local function strategyInsert(specializations)
 end
 
 function scCompactionManager:preLoadSoilCompaction()
+    if g_soilCompaction ~= nil then
+        error("Soil compaction is loaded already!")
+    end
+
+    -- Load in superglobal scope, so other mods can talk with us
+    getfenv(0)["g_soilCompaction"] = self
+
+    self.modDir = scCompactionManager.modDir
+
+    self.debug = false --<%=debug %>
+
     InGameMenu.generateFruitOverlay = Utils.overwrittenFunction(InGameMenu.generateFruitOverlay, scCompactionManager.inGameMenuGenerateFruitOverlay)
 
     scUtils.overwrittenStaticFunction(Utils, "cutFruitArea", scCompactionManager.cutFruitArea)
@@ -117,6 +128,8 @@ function scCompactionManager:loadMap()
 end
 
 function scCompactionManager:deleteMap()
+    getfenv(0)["g_soilCompaction"] = nil
+
     if g_addCheatCommands then
         removeConsoleCommand("scToggleInCabTirePressureControl")
     end

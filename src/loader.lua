@@ -49,6 +49,10 @@ local files = {
     ('%s/placeables/%s'):format(srcDirectory, 'scAirCompressorPlaceable'),
 }
 
+if debugRendering then
+    table.insert(files, ('%s/utils/%s'):format(srcDirectory, 'scDebugUtil'))
+end
+
 -- Insert class name to preload
 local classes = {}
 

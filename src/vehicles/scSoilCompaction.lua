@@ -200,13 +200,17 @@ function scSoilCompaction:applySoilCompaction()
             local x, z, widthX, widthZ, heightX, heightZ = Utils.getXZWidthAndHeight(g_currentMission.terrainDetailHeightId, x0, z0, x1, z1, x2, z2)
 
             -- debug print
-            --scSoilCompaction.drawDensityParallelogram(x, z, widthX, widthZ, heightX, heightZ, 0.25, 255, 255, 0)
+            if g_soilCompaction.debug then
+                scDebugUtil.drawDensityParallelogram(x, z, widthX, widthZ, heightX, heightZ, 0.25, 255, 255, 0)
+            end
 
             local x0, z0, x1, z1, x2, z2, underLayers = self:getCompactionLayers(wheel, width, length, radius, length, length)
             local x, z, widthX, widthZ, heightX, heightZ = Utils.getXZWidthAndHeight(g_currentMission.terrainDetailHeightId, x0, z0, x1, z1, x2, z2)
 
             -- debug print
-            --scSoilCompaction.drawDensityParallelogram(x, z, widthX, widthZ, heightX, heightZ, 0.25, 255, 0, 0)
+            if g_soilCompaction.debug then
+                scDebugUtil.drawDensityParallelogram(x, z, widthX, widthZ, heightX, heightZ, 0.25, 255, 0, 0)
+            end
 
             wheel.underTireCompaction = mathRound(underLayers, 0)
             wheel.fwdTireCompaction = mathRound(fwdLayers, 0)
@@ -267,7 +271,7 @@ function scSoilCompaction:getCompactionLayers(wheel, width, length, radius, delt
     if wheel.repr == wheel.driveNode then
         x0, y0, z0 = localToWorld(wheel.node, wheel.positionX + width / 2 + wheel.scAdditionalWheelOffset * isLeft / 2, wheel.positionY, wheel.positionZ - delta0)
         x1, y1, z1 = localToWorld(wheel.node, wheel.positionX - width / 2 + wheel.scAdditionalWheelOffset * isLeft / 2, wheel.positionY, wheel.positionZ - delta0)
-        x2, y2, z2 = localToWorld(wheel.node, wheel.positionX + width / 2 + wheel.scAdditionalWheelOffset * isLeft/ 2, wheel.positionY, wheel.positionZ + delta2)
+        x2, y2, z2 = localToWorld(wheel.node, wheel.positionX + width / 2 + wheel.scAdditionalWheelOffset * isLeft / 2, wheel.positionY, wheel.positionZ + delta2)
     else
         local x, _, z = localToLocal(wheel.driveNode, wheel.repr, 0, 0, 0)
         x0, y0, z0 = localToWorld(wheel.repr, x + width / 2 + wheel.scAdditionalWheelOffset * isLeft / 2, 0, z - delta0)
@@ -322,19 +326,4 @@ function scSoilCompaction:update(dt)
 end
 
 function scSoilCompaction:draw()
-end
-
--- for debug only: TODO remove before release
-function scSoilCompaction.drawDensityParallelogram(x, z, wX, wZ, hX, hZ, offsetY, r, g, b)
-    local node = g_currentMission.terrainRootNode
-
-    drawDebugLine(  x,          getTerrainHeightAtWorldPos(node, x     ,        0, z            ) + offsetY, z          , r, g, b,
-                    x + wX,     getTerrainHeightAtWorldPos(node, x + wX,        0, z + wZ       ) + offsetY, z + wZ     , r, g, b)
-    drawDebugLine(  x,          getTerrainHeightAtWorldPos(node, x     ,        0, z            ) + offsetY, z          , r, g, b,
-                    x + hX,     getTerrainHeightAtWorldPos(node, x + hX,        0, z + hZ       ) + offsetY, z + hZ     , r, g, b)
-
-    drawDebugLine(  x + wX + hX,getTerrainHeightAtWorldPos(node, x + wX + hX,   0, z + wZ + hZ  ) + offsetY, z + wZ + hZ, r, g, b,
-                    x + wX,     getTerrainHeightAtWorldPos(node, x + wX,        0, z + wZ       ) + offsetY, z + wZ     , r, g, b)
-    drawDebugLine(  x + wX + hX,getTerrainHeightAtWorldPos(node, x + wX + hX,   0, z + wZ + hZ  ) + offsetY, z + wZ + hZ, r, g, b,
-                    x + hX,     getTerrainHeightAtWorldPos(node, x + hX,        0, z + hZ       ) + offsetY, z + hZ     , r, g, b)
 end
