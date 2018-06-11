@@ -100,7 +100,7 @@ end
 local function getPossibleCompaction(soilBulkDensityRef)
     for state, compaction in pairs(_compactionStates) do
         if soilBulkDensityRef > compaction
-                and (state == scSoilCompaction.HEAVY_COMPACTION_LEVEL or soilBulkDensityRef <= compactionStates[math.max(state - 1, 0)]) then
+                and (state == scSoilCompaction.HEAVY_COMPACTION_LEVEL or soilBulkDensityRef <= _compactionStates[math.max(state - 1, 0)]) then
             return state
         end
     end
