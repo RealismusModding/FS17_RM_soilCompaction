@@ -299,7 +299,7 @@ function scSoilCompaction:update(dt)
 
         local applySoilCompaction = true
         if g_seasons ~= nil then
-            applySoilCompaction = g_seasons.weather:isGroundFrozen()
+            applySoilCompaction = not g_seasons.weather:isGroundFrozen()
         end
 
         if applySoilCompaction then
