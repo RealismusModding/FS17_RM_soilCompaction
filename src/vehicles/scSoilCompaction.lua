@@ -8,11 +8,22 @@
 
 scSoilCompaction = {}
 
+scSoilCompaction.HEAVY_COMPACTION_LEVEL = 0
+scSoilCompaction.MEDIUM_COMPACTION_LEVEL = 1
+scSoilCompaction.LIGHT_COMPACTION_LEVEL = 2
+scSoilCompaction.NO_COMPACTION_LEVEL = 3
+
 scSoilCompaction.LIGHT_COMPACTION = -0.15
 scSoilCompaction.MEDIUM_COMPACTION = 0.05
 scSoilCompaction.HEAVY_COMPACTION = 0.2
 
 scSoilCompaction.WORST_COMPACTION_LEVEL = 4
+
+local _compactionStates = {
+    [scSoilCompaction.LIGHT_COMPACTION_LEVEL] = scSoilCompaction.LIGHT_COMPACTION,
+    [scSoilCompaction.MEDIUM_COMPACTION_LEVEL] = scSoilCompaction.MEDIUM_COMPACTION,
+    [scSoilCompaction.HEAVY_COMPACTION_LEVEL] = scSoilCompaction.HEAVY_COMPACTION,
+}
 
 -- Stijn: we have to make an assumption here.. no way to do this clean anyway with the current setup from Giants.
 -- If rotationParts are lower than 5 we are dealing with a parallel track
@@ -49,8 +60,19 @@ end
 function scSoilCompaction:load(savegame)
     self.isAllowedToCompactSoil = not SpecializationUtil.hasSpecialization(Cultivator, self.specializations)
 
+    self.scNumWheels = #self.wheels
+
     for _, wheel in pairs(self.wheels) do
         wheel.scOrgRadius = wheel.radius
+        wheel.scWidth = wheel.width
+
+        if wheel.additionalWheels ~= nil then
+            self.scNumWheels = self.scNumWheels + #wheel.additionalWheels
+
+            for _, additionalWheel in pairs(wheel.additionalWheels) do
+                wheel.scWidth = wheel.scWidth + additionalWheel.width
+            end
+        end
     end
 end
 
@@ -75,30 +97,29 @@ local function getTrackTypeContactAreaLength(crawler, radius)
     return crawler.scrollLength * _trackTypesLenghtFactors[crawler.trackType] - math.pi * radius
 end
 
+local function getPossibleCompaction(soilBulkDensityRef)
+    for state, compaction in pairs(_compactionStates) do
+        if soilBulkDensityRef > compaction
+                and (state == scSoilCompaction.HEAVY_COMPACTION_LEVEL or soilBulkDensityRef <= compactionStates[math.max(state - 1, 0)]) then
+            return state
+        end
+    end
+
+    return scSoilCompaction.NO_COMPACTION_LEVEL
+end
+
 function scSoilCompaction:calculateSoilCompaction(wheel)
     local soilWater = g_currentMission.environment.groundWetness
-    local width = wheel.width
+    local width = wheel.scWidth
     local radius = wheel.scOrgRadius
     local length = math.max(0.1, 0.35 * radius)
 
     wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
     -- TODO: Increase load when MR is not loaded as vanilla tractors are too light
 
-    local numWheels = #self.wheels
-    for _, wheel in pairs(self.wheels) do
-        if wheel.additionalWheels ~= nil then
-           numWheels = numWheels + #wheel.additionalWheels
-        end
-    end
-
-    if wheel.additionalWheels ~= nil then
-        for _, additionalWheel in pairs(wheel.additionalWheels) do
-            width = width + additionalWheel.width
-        end
-    end
-
+    -- Todo: calculate on post load?
     if wheel.load == nil then
-        wheel.load = (self:getTotalMass(false) / numWheels + wheel.mass) * 9.81
+        wheel.load = (self:getTotalMass(false) / self.scNumWheels + wheel.mass) * 9.81
     end
 
     local inflationPressure = 180
@@ -153,20 +174,12 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     -- reference saturation Sk 50%
     local soilBulkDensityRef = 0.2 * (soilWater - 0.5) + 0.7 * math.log10(wheel.groundPressure / 100)
 
-    wheel.possibleCompaction = 3
-    if soilBulkDensityRef > scSoilCompaction.LIGHT_COMPACTION and soilBulkDensityRef <= scSoilCompaction.MEDIUM_COMPACTION then
-        wheel.possibleCompaction = 2
-
-    elseif soilBulkDensityRef > scSoilCompaction.MEDIUM_COMPACTION and soilBulkDensityRef <= scSoilCompaction.HEAVY_COMPACTION then
-        wheel.possibleCompaction = 1
-
-    elseif soilBulkDensityRef > scSoilCompaction.HEAVY_COMPACTION then
-        wheel.possibleCompaction = 0
-    end
+    wheel.possibleCompaction = getPossibleCompaction(soilBulkDensityRef)
 
     --below only for debug print. TODO: remove when done
     wheel.soilBulkDensity = soilBulkDensityRef
 end
+
 
 function scSoilCompaction:applySoilCompaction()
     for _, wheel in pairs(self.wheels) do
