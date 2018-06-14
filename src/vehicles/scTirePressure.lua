@@ -128,7 +128,7 @@ function scTirePressure:updateInflationPressure()
                 wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation, 0)
             end
 
-            wheel.scMaxLoad = self:getTireMaxLoad(wheel, self.scInflationPressure)
+            wheel.scMaxLoad = scSoilCompaction.getTireMaxLoad(wheel, self.scInflationPressure)
 
             wheel.maxDeformation = wheel.scMaxDeformation * scTirePressure.PRESSURE_NORMAL / self.scInflationPressure
         end

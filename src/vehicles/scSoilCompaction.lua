@@ -54,7 +54,6 @@ function scSoilCompaction:preLoad(savegame)
     self.applySoilCompaction = scSoilCompaction.applySoilCompaction
     self.calculateSoilCompaction = scSoilCompaction.calculateSoilCompaction
     self.getCompactionLayers = scSoilCompaction.getCompactionLayers
-    self.getTireMaxLoad = scSoilCompaction.getTireMaxLoad
 end
 
 function scSoilCompaction:load(savegame)
@@ -65,14 +64,24 @@ function scSoilCompaction:load(savegame)
     for _, wheel in pairs(self.wheels) do
         wheel.scOrgRadius = wheel.radius
         wheel.scWidth = wheel.width
+        wheel.scAdditionalWheelOffset = 0
 
         if wheel.additionalWheels ~= nil then
             self.scNumWheels = self.scNumWheels + #wheel.additionalWheels
 
             for _, additionalWheel in pairs(wheel.additionalWheels) do
                 wheel.scWidth = wheel.scWidth + additionalWheel.width
+                wheel.scAdditionalWheelOffset = wheel.scAdditionalWheelOffset + additionalWheel.width
             end
         end
+
+        local inflationPressure = scTirePressure.PRESSURE_NORMAL
+        if self.getInflationPressure ~= nil then
+            inflationPressure = self:getInflationPressure()
+        end
+
+        wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation, 0)
+        wheel.scMaxLoad = scSoilCompaction.getTireMaxLoad(wheel, inflationPressure)
     end
 end
 
@@ -108,28 +117,41 @@ local function getPossibleCompaction(soilBulkDensityRef)
     return scSoilCompaction.NO_COMPACTION_LEVEL
 end
 
+local function getWantedCompaction(soilBulkDensityRef, underTireCompaction, fwdTireCompaction)
+    for state, compaction in pairs(_compactionStates) do
+        if soilBulkDensityRef > compaction then
+            local nextState = math.max(state + 1, scSoilCompaction.NO_COMPACTION_LEVEL)
+            local hasValidDensityLayers = underTireCompaction == nextState
+                    and (fwdTireCompaction == nextState or nextState == scSoilCompaction.LIGHT_COMPACTION)
+            local hasValidSoilBulk = (state == scSoilCompaction.HEAVY_COMPACTION_LEVEL
+                    or state == scSoilCompaction.LIGHT_COMPACTION
+                    or soilBulkDensityRef <= _compactionStates[math.max(state - 1, 0)])
+
+            if hasValidDensityLayers and hasValidSoilBulk then
+                return state
+            end
+        end
+    end
+
+    return scSoilCompaction.NO_COMPACTION_LEVEL
+end
+
 function scSoilCompaction:calculateSoilCompaction(wheel)
-    local soilWater = g_currentMission.environment.groundWetness
     local width = wheel.scWidth
     local radius = wheel.scOrgRadius
     local length = math.max(0.1, 0.35 * radius)
 
+    -- Todo: Increase load when MR is not loaded as vanilla tractors are too light
     wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
-    -- TODO: Increase load when MR is not loaded as vanilla tractors are too light
 
     -- Todo: calculate on post load?
     if wheel.load == nil then
         wheel.load = (self:getTotalMass(false) / self.scNumWheels + wheel.mass) * 9.81
     end
 
-    local inflationPressure = 180
-    if self.getInflationPressure then
+    local inflationPressure = scTirePressure.PRESSURE_NORMAL
+    if self.getInflationPressure ~= nil then
         inflationPressure = self:getInflationPressure()
-    end
-
-    if wheel.scMaxLoad == nil then
-        wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation, 0)
-        wheel.scMaxLoad = self:getTireMaxLoad(wheel, inflationPressure)
     end
 
     wheel.contactArea = 0.38 * wheel.load ^ 0.7 * math.sqrt(width / (radius * 2)) / inflationPressure ^ 0.45
@@ -139,6 +161,7 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     if wheel.tireType == tireTypeCrawler then
         local numOfCrawlers = #self.crawlers
 
+        -- Todo: fetch to function
         for crawlerIndex = 0, numOfCrawlers - 1 do
             local crawler = self.crawlers[crawlerIndex + 1]
             local foundMatch = crawler.speedRefWheel ~= nil and crawler.speedRefWheel.node == wheel.node
@@ -168,6 +191,7 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
         wheel.groundPressure = oldPressure
     end
 
+    local soilWater = g_currentMission.environment.groundWetness
     -- soil saturation index 0.2
     -- c index Cp 0.7
     -- reference pressure 100 kPa
@@ -176,42 +200,29 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
 
     wheel.possibleCompaction = getPossibleCompaction(soilBulkDensityRef)
 
-    --below only for debug print. TODO: remove when done
-    wheel.soilBulkDensity = soilBulkDensityRef
+    -- Below only for debug print.
+    if g_soilCompaction.debug then
+        wheel.soilBulkDensity = soilBulkDensityRef
+    end
 end
-
 
 function scSoilCompaction:applySoilCompaction()
     for _, wheel in pairs(self.wheels) do
-        if wheel.hasGroundContact and not wheel.mrNotAWheel and wheel.isSynchronized then
-            local x0, y0, z0
-            local x1, y1, z1
-            local x2, y2, z2
-
-            local width = wheel.width
-            wheel.scAdditionalWheelOffset = 0
-            if wheel.additionalWheels ~= nil then
-                for _, additionalWheel in pairs(wheel.additionalWheels) do
-                    width = width + additionalWheel.width
-                    wheel.scAdditionalWheelOffset = wheel.scAdditionalWheelOffset + additionalWheel.width
-                end
-            end
-
+        if wheel.hasGroundContact
+                and wheel.isSynchronized
+                and not wheel.mrNotAWheel then
+            local width = wheel.scWidth
             local radius = wheel.scOrgRadius
-
             local length = math.max(0.1, 0.35 * radius)
             --local contactArea = length * width
-            local penetrationResistance = 4e5 / (20 + (g_currentMission.environment.groundWetness * 100 + 5) ^ 2)
 
             self:calculateSoilCompaction(wheel)
 
             local wheelRot = getWheelShapeAxleSpeed(wheel.node, wheel.wheelShape)
-            local wheelRotDir
+            local wheelRotDir = 1
 
             if wheelRot ~= 0 then
                 wheelRotDir = wheelRot / math.abs(wheelRot)
-            else
-                wheelRotDir = 1
             end
 
             local x0, z0, x1, z1, x2, z2, fwdLayers = self:getCompactionLayers(wheel, width, length, radius, radius * wheelRotDir * -1, 2 * radius * wheelRotDir)
@@ -233,28 +244,17 @@ function scSoilCompaction:applySoilCompaction()
             wheel.underTireCompaction = mathRound(underLayers, 0)
             wheel.fwdTireCompaction = mathRound(fwdLayers, 0)
 
-            -- Todo: lookup usage of this
             local soilWater = g_currentMission.environment.groundWetness
             local soilBulkDensityRef = 0.2 * (soilWater - 0.5) + 0.7 * math.log10(wheel.groundPressure / 100)
+            local wantedCompaction = getWantedCompaction(soilBulkDensityRef, wheel.underTireCompaction, wheel.fwdTireCompaction)
 
-            local wantedC = 3
-            if wheel.underTireCompaction == 3 and soilBulkDensityRef > scSoilCompaction.LIGHT_COMPACTION then
-                wantedC = 2
-
-            elseif wheel.underTireCompaction == 2 and wheel.fwdTireCompaction == 2
-                    and soilBulkDensityRef > scSoilCompaction.MEDIUM_COMPACTION and soilBulkDensityRef <= scSoilCompaction.HEAVY_COMPACTION then
-                wantedC = 1
-
-            elseif wheel.underTireCompaction == 1 and wheel.fwdTireCompaction == 1 and soilBulkDensityRef > scSoilCompaction.HEAVY_COMPACTION then
-                wantedC = 0
-            end
-
-            if wantedC ~= 3 then
-                setDensityParallelogram(g_currentMission.terrainDetailId, x, z, widthX, widthZ, heightX, heightZ, g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels, wantedC)
+            if wantedCompaction ~= scSoilCompaction.NO_COMPACTION_LEVEL then
+                setDensityParallelogram(g_currentMission.terrainDetailId, x, z, widthX, widthZ, heightX, heightZ, g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels, wantedCompaction)
             end
 
             -- for debug
             -- penetrationResistance = 0
+            local penetrationResistance = 4e5 / (20 + (soilWater * 100 + 5) ^ 2)
 
             if wheel.groundPressure > penetrationResistance and self:getLastSpeed() > 0 and self.isEntered then
                 local dx, _, dz = localDirectionToWorld(self.rootNode, 0, 0, 1)
@@ -271,7 +271,7 @@ function scSoilCompaction:applySoilCompaction()
     end
 end
 
-function scSoilCompaction:getTireMaxLoad(wheel, inflationPressure)
+function scSoilCompaction.getTireMaxLoad(wheel, inflationPressure)
     local tireLoadIndex = 981 * wheel.scMaxDeformation + 73
     local inflationFac = 0.56 + 0.002 * inflationPressure
 
