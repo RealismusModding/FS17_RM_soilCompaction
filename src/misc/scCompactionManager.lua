@@ -49,6 +49,11 @@ local toInsert = {
         needsOne = {},
         notWith = {}
     },
+    ["soilRoller"] = {
+        requires = { Roller },
+        needsOne = {},
+        notWith = {}
+    },
 }
 
 local function allowInsert(specialization, specializations)

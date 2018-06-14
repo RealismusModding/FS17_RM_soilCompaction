@@ -102,7 +102,8 @@ local specializations = {
     ["deepCultivator"] = ('%s/vehicles/'):format(srcDirectory),
     ["soilCompaction"] = ('%s/vehicles/'):format(srcDirectory),
     ["tirePressure"] = ('%s/vehicles/'):format(srcDirectory),
-    ["atWorkshop"] = ('%s/vehicles/'):format(srcDirectory)
+    ["atWorkshop"] = ('%s/vehicles/'):format(srcDirectory),
+    ["soilRoller"] = ('%s/vehicles/'):format(srcDirectory)
 }
 
 ---
