@@ -31,10 +31,6 @@ end
 function scAtWorkshop:keyEvent(unicode, sym, modifier, isDown)
 end
 
-function scAtWorkshop:loadFromAttributesAndNodes(xmlFile, key)
-    return true
-end
-
 function scAtWorkshop:getSaveAttributesAndNodes(nodeIdent)
     return attributes, ""
 end

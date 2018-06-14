@@ -43,7 +43,8 @@ function scDeepCultivator:load(savegame)
 
     if savegame ~= nil then
         if savegame.xmlFile ~= nil then
-            self.scCultivationDepth = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scCultivationDepth"), self.scCultivationDepth)
+            local depth = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scCultivationDepth"), self.scCultivationDepth)
+            self:updateCultivationDepth(depth, true)
         end
     end
 end
@@ -89,22 +90,17 @@ end
 function scDeepCultivator:keyEvent(...)
 end
 
-function scDeepCultivator:loadFromAttributesAndNodes(xmlFile, key)
-    return true
-end
-
 function scDeepCultivator:getSaveAttributesAndNodes(nodeIdent)
-    local attributes = ""
-
-    attributes = attributes .. "scCultivationDepth=\"" .. self.scCultivationDepth .. "\" "
-
-    return attributes, ""
+    local attributes = ('scCultivationDepth="%s"'):format(self.scCultivationDepth)
+    return attributes, nil
 end
 
 function scDeepCultivator:readStream(streamId, connection)
+    self:updateCultivationDepth(streamReadInt8(streamId), true)
 end
 
 function scDeepCultivator:writeStream(streamId, connection)
+    streamWriteInt8(streamId, self.scCultivationDepth)
 end
 
 function scDeepCultivator:updateCultivationDepth(newDepth, noEventSend)

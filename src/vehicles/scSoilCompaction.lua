@@ -36,10 +36,10 @@ local _trackTypesLenghtFactors = {
 }
 
 ---
--- @param numOfRationParts
+-- @param numOfRotationParts
 --
-local function mapNumOfRotationPartsToTrackType(numOfRationParts)
-    if numOfRationParts < 5 then
+local function mapNumOfRotationPartsToTrackType(numOfRotationParts)
+    if numOfRotationParts < 5 then
         return scSoilCompaction.TRACK_PARALLEL
     end
 
