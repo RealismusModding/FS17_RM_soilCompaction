@@ -55,6 +55,8 @@ local function allowInsert(specialization, specializations)
     return SpecializationUtil.hasSpecialization(specialization, specializations)
 end
 
+local function noopFunction() end
+
 local function strategyInsert(specializations)
     for name, i in pairs(toInsert) do
         local doInsert = true
@@ -88,6 +90,14 @@ local function strategyInsert(specializations)
         end
 
         if doInsert then
+            local class = SpecializationUtil.getSpecialization(name)
+
+            for _, method in pairs({ "load", "delete", "mouseEvent", "keyEvent", "update", "draw" }) do
+                if class[method] == nil then
+                    class[method] = noopFunction
+                end
+            end
+
             table.insert(specializations, SpecializationUtil.getSpecialization(name))
         end
     end

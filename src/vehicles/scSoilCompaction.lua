@@ -96,12 +96,6 @@ end
 function scSoilCompaction:delete()
 end
 
-function scSoilCompaction:mouseEvent(...)
-end
-
-function scSoilCompaction:keyEvent(...)
-end
-
 local function getTrackTypeContactAreaLength(crawler, radius)
     return crawler.scrollLength * _trackTypesLenghtFactors[crawler.trackType] - math.pi * radius
 end

@@ -22,28 +22,6 @@ function scAtWorkshop:load(savegame)
     self.canPlayerInteractInWorkshop = scAtWorkshop.canPlayerInteractInWorkshop
 end
 
-function scAtWorkshop:delete()
-end
-
-function scAtWorkshop:mouseEvent(posX, posY, isDown, isUp, button)
-end
-
-function scAtWorkshop:keyEvent(unicode, sym, modifier, isDown)
-end
-
-function scAtWorkshop:getSaveAttributesAndNodes(nodeIdent)
-    return attributes, ""
-end
-
-function scAtWorkshop:readStream(streamId, connection)
-end
-
-function scAtWorkshop:writeStream(streamId, connection)
-end
-
-function scAtWorkshop:draw()
-end
-
 local function isInDistance(self, player, maxDistance, refNode)
     local vx, _, vz = getWorldTranslation(player.rootNode)
     local sx, _, sz = getWorldTranslation(refNode)
@@ -61,9 +39,6 @@ local function getIsPlayerInRange(self, distance, player)
     end
 
     return false, nil
-end
-
-function scAtWorkshop:update(dt)
 end
 
 function scAtWorkshop:updateTick(dt)

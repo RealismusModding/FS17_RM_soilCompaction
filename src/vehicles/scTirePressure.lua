@@ -80,12 +80,6 @@ function scTirePressure:delete()
     end
 end
 
-function scTirePressure:mouseEvent(...)
-end
-
-function scTirePressure:keyEvent(...)
-end
-
 function scTirePressure:getSaveAttributesAndNodes(nodeIdent)
     local attributes = ('scInflationPressure="%s"'):format(self.scInflationPressure)
     return attributes, nil

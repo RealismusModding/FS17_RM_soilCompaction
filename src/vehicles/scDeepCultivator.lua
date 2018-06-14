@@ -26,7 +26,6 @@ end
 
 function scDeepCultivator:load(savegame)
     self.scCultivationDepth = scDeepCultivator.DEPTH_SHALLOW
-
     self.scOrigMaxForce = self.powerConsumer.maxForce
     self.scDeepCultivatorMod = getXMLBool(self.xmlFile, "vehicle.scCultivation#deep")
     self.scSubsoilerMod = getXMLBool(self.xmlFile, "vehicle.scCultivation#subsoiler")
@@ -82,12 +81,6 @@ function scDeepCultivator.isStoreItemDeepCultivator(storeItem)
 end
 
 function scDeepCultivator:delete()
-end
-
-function scDeepCultivator:mouseEvent(...)
-end
-
-function scDeepCultivator:keyEvent(...)
 end
 
 function scDeepCultivator:getSaveAttributesAndNodes(nodeIdent)
