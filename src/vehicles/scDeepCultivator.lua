@@ -30,7 +30,8 @@ function scDeepCultivator:load(savegame)
     self.scDeepCultivatorMod = getXMLBool(self.xmlFile, "vehicle.scCultivation#deep")
     self.scSubsoilerMod = getXMLBool(self.xmlFile, "vehicle.scCultivation#subsoiler")
 
-    local isValid, depth = scDeepCultivator.isStoreItemDeepCultivator(StoreItemsUtil.storeItemsByXMLFilename[self.configFileName:lower()])
+    local storeItem = StoreItemsUtil.storeItemsByXMLFilename[self.configFileName:lower()]
+    local isValid, depth = scDeepCultivator.isStoreItemDeepCultivator(self.xmlFile, storeItem)
     self.scValidDeepCultivator = isValid
     if depth ~= nil then
         self.scCultivationDepth = depth
@@ -48,28 +49,25 @@ function scDeepCultivator:load(savegame)
     end
 end
 
-function scDeepCultivator.isStoreItemDeepCultivator(storeItem)
-    local xmlFile = loadXMLFile("TempConfig", storeItem.xmlFilename)
-    if not xmlFile then return false end
-
-    local typeName = getXMLString(xmlFile, "vehicle#type")
+function scDeepCultivator.isStoreItemDeepCultivator(xmlFile, storeItem)
     local deepCultivatorMod = Utils.getNoNil(getXMLBool(xmlFile, "vehicle.scCultivation#deep"), false)
     local subsoilerMod = Utils.getNoNil(getXMLBool(xmlFile, "vehicle.scCultivation#subsoiler"), false)
-    local workingWidth = storeItem.specs.workingWidth
-    local maxForce = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.powerConsumer#maxForce"), 0)
-
-    delete(xmlFile)
 
     if deepCultivatorMod and subsoilerMod then
         logInfo("scDeepCultivator:", storeItem.name .. " cannot be both a subsoiler and a deep cultivator. Subsoiler applied.")
         return false
     end
 
+    local workingWidth = storeItem.specs.workingWidth
+    local maxForce = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.powerConsumer#maxForce"), 0)
+
     if storeItem.name == "CULTIMER L 300" -- Fails to listen to the algo
             or deepCultivatorMod -- special designation
             or maxForce / workingWidth > 6 then -- a lot of force on a small area: assume deep
         return true
     end
+
+    local typeName = getXMLString(xmlFile, "vehicle#type")
 
     -- Subsoilers act always deep (as a plough)
     if typeName == "subsoiler" -- Platinum DLC
