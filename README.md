@@ -25,8 +25,8 @@ Cultivators decompact the soil depending on the type. Cultivators with discs dec
 
 Mod equipment can be set to be deep acting cultivators or subsoilers by adding one of the following in the vehicle.xml file:
 
-    <scCultivation>deep</scCultivation>
-    <scCultivation>subsoiler</scCultivation>
+    <scCultivation deep="true" />
+    <scCultivation subsoiler="true" />
 
 Multiple passes with a cultivator will not have an increased effect. Only the first pass is accounted for when the decompacting the soil.
 
