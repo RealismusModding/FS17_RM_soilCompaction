@@ -11,6 +11,7 @@
         <pl>Zagęszczenie gleby</pl>
         <nl>Bodemverdichting</nl>
         <cz>Stlačení půdy</cz>
+        <it>Compattazione del terreno</it>
     </title>
 
     <description>
@@ -20,6 +21,7 @@
         <pl><![CDATA[Zagęszczenie gleby]]></pl>
         <nl><![CDATA[Bodemverdichting]]></nl>
         <cz><![CDATA[Stlačení půdy]]></cz>
+        <it><![CDATA[Compattazione del terreno]]></it>
     </description>
 
     <iconFilename>icon.png</iconFilename>
