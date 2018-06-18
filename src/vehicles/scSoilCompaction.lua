@@ -131,12 +131,18 @@ local function getWantedCompaction(soilBulkDensityRef, underTireCompaction, fwdT
 end
 
 function scSoilCompaction:calculateSoilCompaction(wheel)
+    if not wheel.hasGroundContact then
+        return
+    end
+
     local width = wheel.scWidth
     local radius = wheel.scOrgRadius
     local length = math.max(0.1, 0.35 * radius)
 
     -- Todo: Increase load when MR is not loaded as vanilla tractors are too light
-    wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
+    if self.isServer then
+        wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
+    end
 
     -- Todo: calculate on post load?
     if wheel.load == nil then
