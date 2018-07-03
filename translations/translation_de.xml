@@ -16,7 +16,7 @@
         <text name="warning_tireload" text="Die Last auf den Reifen ist zu hoch. Erhöhe den Reifendruck an %s!"/>
         <!-- General -->
         <text name="typeDesc_airCompressor" text="Kompressor"/>
-        <text name="function_airCompressor" text="Mit einem Kompressor kann man Reifendrücke erhöhen."/>
+        <text name="function_airCompressor" text="Mit einem Kompressor kann man den Reifendruck erhöhen."/>
 
         <text name="CULTIVATION_DEPTH_1" text="Flach"/>
         <text name="CULTIVATION_DEPTH_2" text="Tief"/>
