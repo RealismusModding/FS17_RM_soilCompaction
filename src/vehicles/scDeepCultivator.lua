@@ -122,7 +122,7 @@ function scDeepCultivator:update(dt)
 end
 
 function scDeepCultivator:draw()
-    if self.isClient then
+    if self.isClient and not self.scValidDeepCultivator then
         local cultivationDepthText = g_i18n:getText(("CULTIVATION_DEPTH_%d"):format(tostring(self.scCultivationDepth)))
         -- Todo: need to set a new inputBinding?
         g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_CULTIVATION_DEPTH"):format(cultivationDepthText), InputBinding.IMPLEMENT_EXTRA4, nil, GS_PRIO_HIGH)
