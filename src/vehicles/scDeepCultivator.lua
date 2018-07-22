@@ -21,10 +21,11 @@ end
 
 function scDeepCultivator:preLoad()
     self.updateCultivationDepth = scDeepCultivator.updateCultivationDepth
-    self.processCultivatorAreas = Utils.overwrittenFunction(self.processCultivatorAreas, scDeepCultivator.processCultivatorAreas)
 end
 
 function scDeepCultivator:load(savegame)
+    self.processCultivatorAreas = Utils.overwrittenFunction(self.processCultivatorAreas, scDeepCultivator.processCultivatorAreas)
+
     self.scCultivationDepth = scDeepCultivator.DEPTH_SHALLOW
     self.scOrigMaxForce = self.powerConsumer.maxForce
     self.scDeepCultivatorMod = getXMLBool(self.xmlFile, "vehicle.scCultivation#deep")
@@ -32,6 +33,7 @@ function scDeepCultivator:load(savegame)
 
     local storeItem = StoreItemsUtil.storeItemsByXMLFilename[self.configFileName:lower()]
     local isValid, depth = scDeepCultivator.isStoreItemDeepCultivator(self.xmlFile, storeItem)
+
     self.scValidDeepCultivator = isValid
     if depth ~= nil then
         self.scCultivationDepth = depth
@@ -122,7 +124,7 @@ function scDeepCultivator:update(dt)
 end
 
 function scDeepCultivator:draw()
-    if self.isClient and not self.scValidDeepCultivator then
+    if self.isClient and self.scValidDeepCultivator then
         local cultivationDepthText = g_i18n:getText(("CULTIVATION_DEPTH_%d"):format(tostring(self.scCultivationDepth)))
         -- Todo: need to set a new inputBinding?
         g_currentMission:addHelpButtonText(g_i18n:getText("input_SOILCOMPACTION_CULTIVATION_DEPTH"):format(cultivationDepthText), InputBinding.IMPLEMENT_EXTRA4, nil, GS_PRIO_HIGH)
@@ -131,7 +133,6 @@ end
 
 function scDeepCultivator:processCultivatorAreas(superFunc, ...)
     local depth = self.scCultivationDepth
-
     local oldAreaUpdater = Utils.updateCultivatorArea
 
     Utils.updateCultivatorArea = function(startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ, forced, commonForced, angle)
