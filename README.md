@@ -7,7 +7,7 @@ This mod simulates soil compaction. Vehicles will compact the soil to varying de
 WARNING: You are looking at the DEVELOPMENT VERSION of the Soil Compaction mod. This can break your game!
 
 ## Soil compaction
-There are four levels of compaction (no, light, medium and heavy). The amount of soil compaction on the map can be monitored in the ingame menu "Map overview" showing "Soil composition". Higher degree of compaction will show by the deeper red colour when "Needs ploughing" is activated. This mod disables the vanilla mechanics of having to plough after every third harvest.
+There are four levels of compaction (no, light, medium and heavy). The amount of soil compaction on the map can be monitored in the ingame menu "Map overview" showing "Soil composition". Higher degree of compaction will show by the deeper red colour when "Needs ploughing" is activated. This mod disables the vanilla mechanics of having to plough after every third harvest. Crop yield is reduced for increasing levels of compaction.
 
 The amount of compaction acting by a certain equipment can be monitored in the F1 menu when standing outside and nearby the equipment.
 
@@ -35,7 +35,7 @@ Cultivating fully grown oilseed radish will decompact the soil one addition leve
 ## Tire pressure
 The ground pressure is determined by the load each wheel transmits to the ground and the contact area. The contact area is generally determined by the radius and width of the wheel and the tire pressure. Lower tire pressure increases the contact area and decreases the ground pressure and soil compaction.
 
-It is possible to change the tire pressure on all Motorized equipment that has wheels. The default tire pressure is 1.8 bar (180 kPa) and it is possible to reduce it down to 0.8 bar (80 kPa) by using an air compressor. The air compressor, Wopstr A700, can be bought under category "Placeables" and is moveable. Start the air compressor and inflate or deflate the wheels. For simplicity, all wheels are set to same the tire pressure.
+It is possible to change the tire pressure on all Motorized equipment that has wheels, as well as trailers, hook lift trailers, livestock trailers, liquid manure spreaders and fuel trailers. The default tire pressure is 1.8 bar (180 kPa) and it is possible to reduce it down to 0.8 bar (80 kPa) by using an air compressor. The air compressor, Wopstr A700, can be bought under category "Placeables" and is moveable. Start the air compressor and inflate or deflate the wheels. For simplicity, all wheels are set to same the tire pressure.
 
 An in-cab tire pressure control system is available for mod tractors by adding the following to the vehicle.xml file:
 

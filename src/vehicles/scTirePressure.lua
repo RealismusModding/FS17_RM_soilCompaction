@@ -34,7 +34,8 @@ function scTirePressure:load(savegame)
     self.updateInflationPressure = scTirePressure.updateInflationPressure
     self.getInflationPressure = scTirePressure.getInflationPressure
     self.setInflationPressure = scTirePressure.setInflationPressure
-    self.doCheckSpeedLimit = Utils.overwrittenFunction(self.doCheckSpeedLimit, scTirePressure.doCheckSpeedLimit)
+    self.setPressureSpeedLimit = scTirePressure.setPressureSpeedLimit
+    -- self.doCheckSpeedLimit = Utils.overwrittenFunction(self.doCheckSpeedLimit, scTirePressure.doCheckSpeedLimit)
     self.toggleTirePressure = scTirePressure.toggleTirePressure
 
     WheelsUtil.updateWheelGraphics = Utils.appendedFunction(WheelsUtil.updateWheelGraphics, scTirePressure.updatePressureWheelGraphics)
@@ -60,6 +61,22 @@ function scTirePressure:load(savegame)
         local sampleNode = Utils.indexToObject(self.components, Utils.getNoNil(getXMLString(self.xmlFile, "vehicle.tirePressure.airSound#linkNode"), "0>"))
 
         self.sampleAirSound = SoundUtil.loadSample(self.xmlFile, {}, "vehicle.tirePressure.airSound", "$data/maps/sounds/siloFillSound.wav", self.baseDirectory, sampleNode)
+    end
+end
+
+local function limitSpeed(self)
+
+    if self.scSpeedLimit == nil then
+        self:setPressureSpeedLimit()
+    end
+
+    local linearDamping = (self:getLastSpeed() - self.scSpeedLimit) / 5 --divided by an arbitrary number that works ingame
+    for _, wheel in pairs(self.wheels) do
+        if self:getLastSpeed() > self.scSpeedLimit then
+            setLinearDamping(wheel.node, linearDamping)
+        else
+            setLinearDamping(wheel.node, 0)
+        end
     end
 end
 
@@ -162,6 +179,8 @@ function scTirePressure:update(dt)
     if oldPressure == self:getInflationPressure() and (self.scDoInflate or self.scDoDeflate) then
         self:updateInflation(false)
     end
+
+    limitSpeed(self)
 end
 
 function scTirePressure:updateTick(dt)
@@ -207,7 +226,7 @@ function scTirePressure:draw()
     end
 
     --if self.isEntered then
-    --    renderText(0.44, 0.78, 0.01, "limit = " .. tostring(self.motor.maxForwardSpeed))
+    --    renderText(0.44, 0.78, 0.01, "limit = " .. tostring(self.scSpeedLimit))
     --end
 end
 
@@ -225,6 +244,8 @@ function scTirePressure:setInflationPressure(pressure, noEventSend)
     if self.scInflationPressure ~= old then
         self:updateInflationPressure()
     end
+
+    self:setPressureSpeedLimit()
 end
 
 function scTirePressure:doCheckSpeedLimit(superFunc)
@@ -236,11 +257,15 @@ function scTirePressure:doCheckSpeedLimit(superFunc)
     return parent or self.scInflationPressure < scTirePressure.PRESSURE_NORMAL
 end
 
-function scTirePressure:getPressureSpeedLimit()
-    local maxSpeed = self.motor.maxForwardSpeed
-    local limit = maxSpeed - 10
-    self.speedLimit = (self.scInflationPressure - scTirePressure.PRESSURE_MIN) / (scTirePressure.PRESSURE_MAX - scTirePressure.PRESSURE_MIN) + 10
-    self.motor.speedLimit = self.speedLimit
+function scTirePressure:setPressureSpeedLimit()
+    local maxSpeed = 80 --need a high limit for those that have no speed limit
+    
+    if self.motor ~= nil then
+        maxSpeed = self.motor.maxRpm / self.motor.minForwardGearRatio / 2.653 
+    end
+
+    local limit = math.max(maxSpeed - 10, 10)
+    self.scSpeedLimit = math.max((self.scInflationPressure - scTirePressure.PRESSURE_MIN) / (scTirePressure.PRESSURE_MAX - scTirePressure.PRESSURE_MIN) * limit, 10)
 end
 
 function scTirePressure.updatePressureWheelGraphics(self, wheel, x, y, z, xDrive, suspensionLength)
