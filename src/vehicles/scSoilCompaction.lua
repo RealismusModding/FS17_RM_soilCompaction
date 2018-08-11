@@ -139,7 +139,6 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     local radius = wheel.scOrgRadius
     local length = math.max(0.1, 0.35 * radius)
 
-    -- Todo: Increase load when MR is not loaded as vanilla tractors are too light
     if self.isServer then
         wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
     end
@@ -184,7 +183,6 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
         wheel.contactArea = length * width
     end
 
-    -- TODO: No need to store groundPressure, but for display
     local oldPressure = Utils.getNoNil(wheel.groundPressure, wheel.load / wheel.contactArea)
     wheel.groundPressure = oldPressure * 99 / 100 + wheel.load / wheel.contactArea / 100
     if wheel.contactArea == 0 then
@@ -207,9 +205,10 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
 end
 
 function scSoilCompaction:applySoilCompaction()
+    local tireTypeCrawler = WheelsUtil.getTireType("crawler")
     for _, wheel in pairs(self.wheels) do
         if wheel.hasGroundContact
-                and wheel.isSynchronized
+                and (wheel.isSynchronized or wheel.tireType == tireTypeCrawler)
                 and not wheel.mrNotAWheel then
             local width = wheel.scWidth
             local radius = wheel.scOrgRadius
@@ -248,12 +247,17 @@ function scSoilCompaction:applySoilCompaction()
             local soilBulkDensityRef = 0.2 * (soilWater - 0.5) + 0.7 * math.log10(wheel.groundPressure / 100)
             local wantedCompaction = getWantedCompaction(soilBulkDensityRef, wheel.underTireCompaction, wheel.fwdTireCompaction)
 
+            --planters do not compact soil if soil is already uncompacted 
+            if SpecializationUtil.hasSpecialization(sowingMachine, self.specializations) 
+                and wheel.fwdTireCompaction == scSoilCompaction.NO_COMPACTION_LEVEL 
+                and wantedCompaction == scSoilCompaction.LIGHT_COMPACTION_LEVEL then
+                    wantedCompaction = scSoilCompaction.NO_COMPACTION_LEVEL
+            end
+
             if wantedCompaction ~= scSoilCompaction.NO_COMPACTION_LEVEL then
                 setDensityParallelogram(g_currentMission.terrainDetailId, x, z, widthX, widthZ, heightX, heightZ, g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels, wantedCompaction)
             end
 
-            -- for debug
-            -- penetrationResistance = 0
             local penetrationResistance = 4e5 / (20 + (soilWater * 100 + 5) ^ 2)
 
             if wheel.groundPressure > penetrationResistance and self:getLastSpeed() > 0 and self.isEntered then

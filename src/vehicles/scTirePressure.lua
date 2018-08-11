@@ -35,7 +35,6 @@ function scTirePressure:load(savegame)
     self.getInflationPressure = scTirePressure.getInflationPressure
     self.setInflationPressure = scTirePressure.setInflationPressure
     self.setPressureSpeedLimit = scTirePressure.setPressureSpeedLimit
-    -- self.doCheckSpeedLimit = Utils.overwrittenFunction(self.doCheckSpeedLimit, scTirePressure.doCheckSpeedLimit)
     self.toggleTirePressure = scTirePressure.toggleTirePressure
 
     WheelsUtil.updateWheelGraphics = Utils.appendedFunction(WheelsUtil.updateWheelGraphics, scTirePressure.updatePressureWheelGraphics)
@@ -248,18 +247,9 @@ function scTirePressure:setInflationPressure(pressure, noEventSend)
     self:setPressureSpeedLimit()
 end
 
-function scTirePressure:doCheckSpeedLimit(superFunc)
-    local parent = false
-    if superFunc ~= nil then
-        parent = superFunc(self)
-    end
-
-    return parent or self.scInflationPressure < scTirePressure.PRESSURE_NORMAL
-end
-
 function scTirePressure:setPressureSpeedLimit()
     local maxSpeed = 80 --need a high limit for those that have no speed limit
-    
+
     if self.motor ~= nil then
         maxSpeed = self.motor.maxRpm / self.motor.minForwardGearRatio / 2.653 
     end
