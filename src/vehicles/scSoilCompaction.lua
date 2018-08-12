@@ -54,6 +54,7 @@ function scSoilCompaction:preLoad(savegame)
     self.applySoilCompaction = scSoilCompaction.applySoilCompaction
     self.calculateSoilCompaction = scSoilCompaction.calculateSoilCompaction
     self.getCompactionLayers = scSoilCompaction.getCompactionLayers
+    self.getCrawlerContactLength = scSoilCompaction.getCrawlerContactLength
 end
 
 function scSoilCompaction:load(savegame)
@@ -97,7 +98,7 @@ function scSoilCompaction:delete()
 end
 
 local function getTrackTypeContactAreaLength(crawler, radius)
-    return crawler.scrollLength * _trackTypesLenghtFactors[crawler.trackType] - math.pi * radius
+    return crawler.scrollLength * _trackTypesLenghtFactors[crawler.trackType] - math.pi * radius * 0.4
 end
 
 local function getPossibleCompaction(soilBulkDensityRef)
@@ -130,6 +131,43 @@ local function getWantedCompaction(soilBulkDensityRef, underTireCompaction, fwdT
     return scSoilCompaction.NO_COMPACTION_LEVEL
 end
 
+local function calculateSoilBulkDensityRef(groundPressure)
+    local soilWater = g_currentMission.environment.groundWetness
+    -- soil saturation index 0.2
+    -- c index Cp 0.7
+    -- reference pressure 100 kPa
+    -- reference saturation Sk 50%
+    return 0.2 * (soilWater - 0.5) + 0.7 * math.log10(groundPressure / 100)
+end
+
+local function calculatePenetrationResistance()
+    local soilWater = g_currentMission.environment.groundWetness
+    return 4e5 / (20 + (soilWater * 100 + 5) ^ 2)
+end
+
+function scSoilCompaction:getCrawlerContactLength(wheel)
+local numOfCrawlers = #self.crawlers
+
+    for crawlerIndex = 0, numOfCrawlers - 1 do
+        local crawler = self.crawlers[crawlerIndex + 1]
+        local foundMatch = crawler.speedRefWheel ~= nil and crawler.speedRefWheel.node == wheel.node
+
+        if not foundMatch and wheel.hasTireTracks then
+            local wheelIndex = wheel.xmlIndex
+            if wheelIndex >= numOfCrawlers then
+                wheelIndex = math.min(crawlerIndex, wheel.xmlIndex)
+            end
+
+            foundMatch = crawlerIndex == wheelIndex
+        end
+
+        if foundMatch then
+            local radius = wheel.scOrgRadius
+            return getTrackTypeContactAreaLength(crawler, radius)
+        end
+    end
+end
+
 function scSoilCompaction:calculateSoilCompaction(wheel)
     if not wheel.hasGroundContact then
         return
@@ -157,28 +195,8 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
 
     local tireTypeCrawler = WheelsUtil.getTireType("crawler")
 
-    if wheel.tireType == tireTypeCrawler then
-        local numOfCrawlers = #self.crawlers
-
-        -- Todo: fetch to function
-        for crawlerIndex = 0, numOfCrawlers - 1 do
-            local crawler = self.crawlers[crawlerIndex + 1]
-            local foundMatch = crawler.speedRefWheel ~= nil and crawler.speedRefWheel.node == wheel.node
-
-            if not foundMatch and wheel.hasTireTracks then
-                local wheelIndex = wheel.xmlIndex
-                if wheelIndex >= numOfCrawlers then
-                    wheelIndex = math.min(crawlerIndex, wheel.xmlIndex)
-                end
-
-                foundMatch = crawlerIndex == wheelIndex
-            end
-
-            if foundMatch then
-                length = getTrackTypeContactAreaLength(crawler, radius)
-                break
-            end
-        end
+    if wheel.tireType == tireTypeCrawler and wheel.tireTrackAtlasIndex > 0 then
+        length = self:getCrawlerContactLength(wheel)
 
         wheel.contactArea = length * width
     end
@@ -189,31 +207,25 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
         wheel.groundPressure = oldPressure
     end
 
-    local soilWater = g_currentMission.environment.groundWetness
-    -- soil saturation index 0.2
-    -- c index Cp 0.7
-    -- reference pressure 100 kPa
-    -- reference saturation Sk 50%
-    local soilBulkDensityRef = 0.2 * (soilWater - 0.5) + 0.7 * math.log10(wheel.groundPressure / 100)
-
+    local soilBulkDensityRef = calculateSoilBulkDensityRef(wheel.groundPressure)
     wheel.possibleCompaction = getPossibleCompaction(soilBulkDensityRef)
 
     -- Below only for debug print.
     if g_soilCompaction.debug then
         wheel.soilBulkDensity = soilBulkDensityRef
     end
+
 end
 
 function scSoilCompaction:applySoilCompaction()
     local tireTypeCrawler = WheelsUtil.getTireType("crawler")
     for _, wheel in pairs(self.wheels) do
         if wheel.hasGroundContact
-                and (wheel.isSynchronized or wheel.tireType == tireTypeCrawler)
+                and (wheel.isSynchronized or (wheel.tireType == tireTypeCrawler and wheel.tireTrackAtlasIndex > 0))
                 and not wheel.mrNotAWheel then
             local width = wheel.scWidth
             local radius = wheel.scOrgRadius
             local length = math.max(0.1, 0.35 * radius)
-            --local contactArea = length * width
 
             self:calculateSoilCompaction(wheel)
 
@@ -243,8 +255,7 @@ function scSoilCompaction:applySoilCompaction()
             wheel.underTireCompaction = mathRound(underLayers, 0)
             wheel.fwdTireCompaction = mathRound(fwdLayers, 0)
 
-            local soilWater = g_currentMission.environment.groundWetness
-            local soilBulkDensityRef = 0.2 * (soilWater - 0.5) + 0.7 * math.log10(wheel.groundPressure / 100)
+            local soilBulkDensityRef = calculateSoilBulkDensityRef(wheel.groundPressure)
             local wantedCompaction = getWantedCompaction(soilBulkDensityRef, wheel.underTireCompaction, wheel.fwdTireCompaction)
 
             --planters do not compact soil if soil is already uncompacted 
@@ -258,9 +269,7 @@ function scSoilCompaction:applySoilCompaction()
                 setDensityParallelogram(g_currentMission.terrainDetailId, x, z, widthX, widthZ, heightX, heightZ, g_currentMission.ploughCounterFirstChannel, g_currentMission.ploughCounterNumChannels, wantedCompaction)
             end
 
-            local penetrationResistance = 4e5 / (20 + (soilWater * 100 + 5) ^ 2)
-
-            if wheel.groundPressure > penetrationResistance and self:getLastSpeed() > 0 and self.isEntered then
+            if wheel.groundPressure > calculatePenetrationResistance() and self:getLastSpeed() > 0 and self.isEntered then
                 local dx, _, dz = localDirectionToWorld(self.rootNode, 0, 0, 1)
                 local angle = Utils.convertToDensityMapAngle(Utils.getYRotationFromDirection(dx, dz), g_currentMission.terrainDetailAngleMaxValue)
 
