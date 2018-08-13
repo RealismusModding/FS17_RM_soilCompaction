@@ -55,6 +55,7 @@ function scSoilCompaction:preLoad(savegame)
     self.calculateSoilCompaction = scSoilCompaction.calculateSoilCompaction
     self.getCompactionLayers = scSoilCompaction.getCompactionLayers
     self.getCrawlerContactLength = scSoilCompaction.getCrawlerContactLength
+    self.getTireContactLength = scSoilCompaction.getTireContactLength
 end
 
 function scSoilCompaction:load(savegame)
@@ -145,8 +146,13 @@ local function calculatePenetrationResistance()
     return 4e5 / (20 + (soilWater * 100 + 5) ^ 2)
 end
 
+function scSoilCompaction:getTireContactLength(radius)
+    return math.max(0.1, 0.35 * radius)
+end
+
 function scSoilCompaction:getCrawlerContactLength(wheel)
-local numOfCrawlers = #self.crawlers
+    local numOfCrawlers = #self.crawlers
+    local radius = wheel.scOrgRadius
 
     for crawlerIndex = 0, numOfCrawlers - 1 do
         local crawler = self.crawlers[crawlerIndex + 1]
@@ -162,10 +168,11 @@ local numOfCrawlers = #self.crawlers
         end
 
         if foundMatch then
-            local radius = wheel.scOrgRadius
             return getTrackTypeContactAreaLength(crawler, radius)
         end
     end
+
+    return self:getTireContactLength(radius)
 end
 
 function scSoilCompaction:calculateSoilCompaction(wheel)
@@ -175,7 +182,7 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
 
     local width = wheel.scWidth
     local radius = wheel.scOrgRadius
-    local length = math.max(0.1, 0.35 * radius)
+    local length = self:getTireContactLength(radius)
 
     if self.isServer then
         wheel.load = getWheelShapeContactForce(wheel.node, wheel.wheelShape)
@@ -194,7 +201,6 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     wheel.contactArea = 0.38 * wheel.load ^ 0.7 * math.sqrt(width / (radius * 2)) / inflationPressure ^ 0.45
 
     local tireTypeCrawler = WheelsUtil.getTireType("crawler")
-
     if wheel.tireType == tireTypeCrawler and wheel.tireTrackAtlasIndex > 0 then
         length = self:getCrawlerContactLength(wheel)
 
@@ -214,7 +220,6 @@ function scSoilCompaction:calculateSoilCompaction(wheel)
     if g_soilCompaction.debug then
         wheel.soilBulkDensity = soilBulkDensityRef
     end
-
 end
 
 function scSoilCompaction:applySoilCompaction()
