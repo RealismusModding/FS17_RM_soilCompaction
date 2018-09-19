@@ -17,6 +17,7 @@ scTirePressure.PRESSURE_MAX = 180
 
 scTirePressure.INCREASE = 1.15
 scTirePressure.FLATE_MULTIPLIER = 0.01
+scTirePressure.TIRE_LOAD_SPEED_LIMIT = 6.7
 
 local PARAM_MORPH = "morphPosition"
 
@@ -35,7 +36,8 @@ function scTirePressure:load(savegame)
     self.getInflationPressure = scTirePressure.getInflationPressure
     self.setInflationPressure = scTirePressure.setInflationPressure
     self.toggleTirePressure = scTirePressure.toggleTirePressure
-
+    self.updateTireLoadExceed = scTirePressure.updateTireLoadExceed
+    self.scSpeedLimit = math.huge
     WheelsUtil.updateWheelGraphics = Utils.appendedFunction(WheelsUtil.updateWheelGraphics, scTirePressure.updatePressureWheelGraphics)
 
     self.scInflationPressure = scTirePressure.PRESSURE_NORMAL
@@ -62,6 +64,17 @@ function scTirePressure:load(savegame)
     end
 end
 
+local function limitSpeed(self)
+    local linearDamping = Utils.clamp((self:getLastSpeed() - self.scSpeedLimit) / 5, 0, 1) --divided by an arbitrary number that works ingame
+    self.ld = linearDamping
+    for _, wheel in pairs(self.wheels) do
+        if self:getLastSpeed() > self.scSpeedLimit then
+            setLinearDamping(wheel.node, linearDamping)
+        else
+            setLinearDamping(wheel.node, 0)
+        end
+    end
+end
 function scTirePressure:postLoad(savegame)
     if savegame ~= nil and not savegame.resetVehicles then
         local tirePressure = Utils.getNoNil(getXMLInt(savegame.xmlFile, savegame.key .. "#scInflationPressure"), self.scInflationPressure)
@@ -161,8 +174,33 @@ function scTirePressure:update(dt)
     if oldPressure == self:getInflationPressure() and (self.scDoInflate or self.scDoDeflate) then
         self:updateInflation(false)
     end
+
+    self:updateTireLoadExceed()
+
+    if self.scTireLoadExceed ~= nil and self:isPlayerInRange() then
+        local storeItem = StoreItemsUtil.storeItemsByXMLFilename[self.configFileName:lower()]
+        g_currentMission:addExtraPrintText(g_i18n:getText("warning_tireload"):format(storeItem.name))
+    end
+
+    limitSpeed(self)
 end
 
+function scTirePressure:updateTireLoadExceed()
+    self.scTireLoadExceed = nil
+    self.scSpeedLimit = math.huge
+    for _, wheel in pairs(self.wheels) do
+        if not wheel.mrNotAWheel and wheel.load ~= nil and wheel.scMaxLoad ~= nil then
+            local oldLoad = Utils.getNoNil(wheel.scLoad, wheel.load)
+            wheel.scLoad = oldLoad * 99 / 100 + wheel.load / 100
+
+            if wheel.scLoad > wheel.scMaxLoad then
+                self.scTireLoadExceed = wheel
+                self.scSpeedLimit = scTirePressure.TIRE_LOAD_SPEED_LIMIT
+                break -- already a value, no need to look at others
+            end
+        end
+    end
+end
 function scTirePressure:updateTick(dt)
     if self.isClient then
         local pressure = self:getInflationPressure()

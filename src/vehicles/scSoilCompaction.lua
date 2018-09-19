@@ -83,7 +83,7 @@ function scSoilCompaction:load(savegame)
         end
 
         wheel.scMaxDeformation = Utils.getNoNil(wheel.maxDeformation, 0)
-        wheel.scMaxLoad = scSoilCompaction.getTireMaxLoad(wheel, inflationPressure)
+        wheel.scMaxLoad = scSoilCompaction.getTireMaxLoad(wheel, inflationPressure, self.mrIsMrVehicle)
     end
 end
 
@@ -289,9 +289,12 @@ function scSoilCompaction:applySoilCompaction()
     end
 end
 
-function scSoilCompaction.getTireMaxLoad(wheel, inflationPressure)
+function scSoilCompaction.getTireMaxLoad(wheel, inflationPressure, isMRVehicle)
     local tireLoadIndex = 981 * wheel.scMaxDeformation + 73
-    local inflationFac = 0.56 + 0.002 * inflationPressure
+    local inflationFac = 0.03 * (30 * inflationPressure / 100 - 1)
+    if isMRVehicle then
+        inflationFac = 0.37 * (1 + 0.95 * inflationPressure / 100)
+    end
 
     -- in kN
     return 44 * math.exp(0.0288 * tireLoadIndex) * inflationFac / 100
