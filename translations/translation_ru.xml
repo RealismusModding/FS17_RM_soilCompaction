@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <!-- Inputs -->
+        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Глубина культивации (%s)"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Накачать давление"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Стравить давление"/>
+        <text name="input_COMPRESSOR_INFLATE" text="Увеличить давление в шине"/>
+        <text name="input_COMPRESSOR_DEFLATE" text="Уменьшить давление в шине"/>
+        <text name="input_ACTIVATE_HANDTOOL2" text="Активировать ручной инструмент 2"/>
+        <!-- Info -->
+        <text name="info_TIRE_PRESSURE" text="Давление в шинах: %1.2f атм"/>
+        <!-- Warnings -->
+        <text name="warning_compressorRangeRestriction"
+              text="Шланг компрессора не позволяет вам двигаться дальше"/>
+        <text name="warning_tireload" text="Слишком высокая нагрузка на шины. Увеличьте давление на %s!"/>
+        <!-- General -->
+        <text name="typeDesc_airCompressor" text="компрессор"/>
+        <text name="function_airCompressor" text="С помощью компрессора вы можете изменять давление в шинах вашего оборудования."/>
+
+        <text name="CULTIVATION_DEPTH_1" text="Мелко"/>
+        <text name="CULTIVATION_DEPTH_2" text="Глубоко"/>
+
+        <text name="COMPACTION_0" text="%s вызывает сильное уплотнение"/>
+        <text name="COMPACTION_1" text="%s вызывает среднее уплотнение"/>
+        <text name="COMPACTION_2" text="%s вызывает слабое уплотнение"/>
+        <text name="COMPACTION_3" text="%s не вызывает уплотнения"/>
+    </texts>
+</l10n>
