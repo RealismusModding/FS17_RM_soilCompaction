@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <!-- Inputs -->
+        <text name="input_SOILCOMPACTION_CULTIVATION_DEPTH" text="Profundidad Cultivo (%s)"/>
+        <text name="input_SOILCOMPACTION_TIRE_INFLATE" text="Aumentar Presión"/>
+        <text name="input_SOILCOMPACTION_TIRE_DEFLATE" text="Disminuir Presión"/>
+        <text name="input_COMPRESSOR_INFLATE" text="Aumentar Presión Rueda"/>
+        <text name="input_COMPRESSOR_DEFLATE" text="Disminuir Presión Rueda"/>
+        <text name="input_ACTIVATE_HANDTOOL2" text="Activar Herramienta Manual 2"/>
+        <!-- Info -->
+        <text name="info_TIRE_PRESSURE" text="Presión Rueda: %1.2f bar"/>
+        <!-- Warnings -->
+        <text name="warning_compressorRangeRestriction"
+              text="Esta es la extensión máxima de la manguera."/>
+        <text name="warning_tireload" text="La carga de la rueda es demasiado alta. Aumente la presión de las ruedas en %s!"/>
+        <!-- General -->
+        <text name="typeDesc_airCompressor" text="Compresor de Aire"/>
+        <text name="function_airCompressor" text="Con un compresor de aire puede aumentar la presión de las ruedas de su vehículo."/>
+
+        <text name="CULTIVATION_DEPTH_1" text="Superficial"/>
+        <text name="CULTIVATION_DEPTH_2" text="Profundo"/>
+
+        <text name="COMPACTION_0" text="%s provoca una gran compactación"/>
+        <text name="COMPACTION_1" text="%s provoca una compactación media"/>
+        <text name="COMPACTION_2" text="%s provoca una baja compactación"/>
+        <text name="COMPACTION_3" text="%s no provoca compactación"/>
+    </texts>
+</l10n>
